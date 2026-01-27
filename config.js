@@ -5,7 +5,7 @@
 // เปลี่ยนค่า API_BASE ตามที่คุณรันเซิร์ฟเวอร์ Backend
 const CONFIG = {
     // API Base URL
-    API_BASE: "http://127.0.0.1:8000",
+    API_BASE: "https://itzel-unfoiled-diphtheritically.ngrok-free.dev",
     
     // Token storage key
     TOKEN_KEY: "access_token",
