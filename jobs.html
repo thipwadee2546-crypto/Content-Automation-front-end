@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Status - FB AI Content Manager</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --primary-color: #6366f1;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --bg-color: #f8fafc;
+            --glass-white: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-color);
+            color: #1e293b;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Sidebar Glassmorphism */
+        .sidebar {
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            overflow-y: auto;
+            z-index: 50;
+            transition: transform 0.3s ease;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Navigation Items */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            margin: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #64748b;
+            font-weight: 500;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .nav-item.active {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .nav-item i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Cards and Containers */
+        .fb-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid #f1f5f9;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Status colors */
+        .job-badge {
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .job-badge-pending {
+            background: #fef9c3;
+            color: #a16207;
+            border: 1px solid #fde047;
+        }
+
+        .job-badge-processing {
+            background: #ffedd5;
+            color: #c2410c;
+            border: 1px solid #fdba74;
+            animation: pulse 2s infinite;
+        }
+
+        .job-badge-ready {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
+        }
+
+        .job-badge-published {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #93c5fd;
+        }
+
+        .status-filter-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: #e5e7eb;
+            color: #374151;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .status-filter-tab:hover {
+            background: #d1d5db;
+        }
+
+        .status-filter-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Logo -->
+        <div class="p-6 border-b border-gray-100 flex items-center justify-center">
+            <div
+                class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white mr-3 shadow-lg shadow-indigo-200">
+                <i class="fab fa-facebook-f text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-800 tracking-tight">AI Manager</h1>
+                <p class="text-xs text-slate-400">Content Automation</p>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="mt-8 px-4 space-y-2">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="calendar.html" class="nav-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Calendar</span>
+            </a>
+            <div class="pt-4 pb-2 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Content</div>
+            <a href="content.html" class="nav-item">
+                <i class="fas fa-magic"></i>
+                <span>Create Content</span>
+            </a>
+            <a href="post.html" class="nav-item">
+                <i class="fas fa-paper-plane"></i>
+                <span>Post Content</span>
+            </a>
+            <a href="jobs.html" class="nav-item active" id="nav-jobs" style="display: none;">
+                <i class="fas fa-stream"></i>
+                <span>Job Status</span>
+            </a>
+            <div class="pt-4 pb-2 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider" id="nav-admin-header"
+                style="display: none;">
+                Admin</div>
+                <a href="pages.html" class="nav-item">
+                    <i class="fas fa-flag"></i>
+                    <span>Pages</span>
+                </a>
+                <a href="users.html" class="nav-item" id="nav-users" style="display: none;">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Users</span>
+                </a>
+        </nav>
+
+        <!-- Divider -->
+        <div class="absolute bottom-0 w-full p-4 border-t border-gray-100 bg-gray-50/50 backdrop-blur-sm">
+            <button onclick="logout()"
+                class="flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium">
+                <i class="fas fa-sign-out-alt w-6"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header Bar -->
+        <div
+            class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-8 py-4 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800" id="pageTitle">Job Status</h2>
+                <p class="text-sm text-slate-500">Monitor your content pipeline</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button
+                    class="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 flex items-center justify-center transition-all shadow-sm">
+                    <i class="far fa-bell"></i>
+                </button>
+                <div class="user-profile flex items-center gap-3 pl-2 pr-4 py-1.5 bg-white border border-gray-200 rounded-full hover:border-indigo-300 transition-all cursor-pointer shadow-sm"
+                    onclick="window.location.href='profile.html'">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm"
+                        id="userInitial">A</div>
+                    <div class="hidden md:block">
+                        <p class="text-sm font-bold text-slate-700 leading-tight" id="userDisplay">User</p>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold" id="userRole" style="opacity: 0;"></p>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-300 text-xs ml-2"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="p-8">
+            <div id="jobs" class="block">
+                <div class="fb-card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">📋 สถานะงานการเผยแพร่</h3>
+                            <p class="text-gray-600 text-sm">ดูและจัดการสถานะของงานทั้งหมด</p>
+                        </div>
+                        <button onclick="refreshJobsList()"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-600">
+                            <i class="fas fa-sync mr-2"></i>รีเฟรช
+                        </button>
+                    </div>
+
+                    <!-- Page Filter Dropdown -->
+                    <div class="mb-4">
+                        <label class="text-sm font-600 text-gray-700 block mb-2">📄 เลือกเพจที่จะแสดง</label>
+                        <select id="jobsPageFilter" onchange="setJobsPageFilter(this.value)"
+                            class="border rounded px-3 py-2 w-full md:w-64 bg-white">
+                            <option value="">-- ดูทั้งหมด --</option>
+                        </select>
+                    </div>
+
+                    <!-- Status Filter Tabs -->
+                    <div class="flex gap-2 mb-4 flex-wrap">
+                        <button onclick="setJobsFilter('all')" class="status-filter-tab active" data-filter="all">
+                            ทั้งหมด
+                        </button>
+                        <button onclick="setJobsFilter('pending')" class="status-filter-tab" data-filter="pending">
+                            ⏳ Pending
+                        </button>
+                        <button onclick="setJobsFilter('ready')" class="status-filter-tab" data-filter="ready">
+                            ✅ Ready
+                        </button>
+                        <button onclick="setJobsFilter('published')" class="status-filter-tab" data-filter="published">
+                            📤 Published
+                        </button>
+                    </div>
+
+                    <!-- Jobs List -->
+                    <div id="jobsList" class="space-y-3">
+                        <p class="text-gray-500 text-center py-4">กำลังโหลด...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const API_BASE = CONFIG.API_BASE;
+        let cachedJobs = [];
+        let currentJobsFilter = 'all';
+        let currentJobsPageFilter = '';
+
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+
+        function isLoggedIn() {
+            return !!getToken();
+        }
+
+        function logout() {
+            if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('username');
+                window.location.href = 'index.html';
+            }
+        }
+
+        function showAdminOnlyLinks() {
+            const navJobs = document.getElementById('nav-jobs');
+            const navUsers = document.getElementById('nav-users');
+            const navAdminHeader = document.getElementById('nav-admin-header');
+            if (navJobs) navJobs.style.display = '';
+            if (navUsers) navUsers.style.display = '';
+            if (navAdminHeader) navAdminHeader.style.display = '';
+        }
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!response.ok) throw new Error('Unauthorized');
+
+                const user = await response.json();
+                const initial = user.username.charAt(0).toUpperCase();
+
+                document.getElementById('userDisplay').textContent = user.username;
+                document.getElementById('userInitial').textContent = initial;
+
+                // Set role display
+                const roleEl = document.getElementById('userRole');
+                if (roleEl) {
+                    roleEl.textContent = user.role === 'admin' ? 'Admin' : 'User';
+                    roleEl.style.opacity = '1';
+                    roleEl.style.transition = 'opacity 0.3s ease-in';
+                }
+
+                if (user.role === 'admin') {
+                    showAdminOnlyLinks();
+                }
+
+            } catch (error) {
+                console.error('Failed to load user info:', error);
+                logout();
+            }
+        }
+
+        async function loadJobsList() {
+            try {
+                const response = await fetch(`${API_BASE}/jobs/status-posts`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load jobs');
+
+                cachedJobs = await response.json();
+                updateJobsPageFilterDropdown();
+                renderJobsList();
+
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                document.getElementById('jobsList').innerHTML = '<p class="text-red-500 text-center">ไม่สามารถโหลดสถานะงานได้</p>';
+            }
+        }
+
+        function renderJobsList() {
+            const jobsList = document.getElementById('jobsList');
+            let jobs = cachedJobs;
+
+            if (currentJobsFilter !== 'all') {
+                jobs = jobs.filter(j => j.Status_Posts === currentJobsFilter);
+            }
+
+            if (currentJobsPageFilter) {
+                jobs = jobs.filter(j => j.Page_Name === currentJobsPageFilter);
+            }
+
+            if (jobs.length === 0) {
+                jobsList.innerHTML = '<p class="text-gray-500 text-center py-4">ไม่มีงานในระบบ</p>';
+                return;
+            }
+
+            jobsList.innerHTML = jobs.map(job => {
+                const badgeClass = job.Status_Posts === 'pending' ? 'job-badge-pending' :
+                    job.Status_Posts === 'processing' ? 'job-badge-processing' :
+                        job.Status_Posts === 'ready' ? 'job-badge-ready' : 'job-badge-published';
+
+                return `
+                    <div class="bg-white border rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="font-bold text-gray-800">${job.Product || '-'}</h4>
+                                <p class="text-sm text-gray-600">เพจ: ${job.Page_Name || '-'}</p>
+                            </div>
+                            <span class="job-badge ${badgeClass}">${job.Status_Posts}</span>
+                        </div>
+                        <p class="text-sm text-gray-700 mb-2 line-clamp-2">${job.Description || '-'}</p>
+                        <div class="text-xs text-gray-500 flex gap-4">
+                            <span><i class="far fa-clock mr-1"></i> ${new Date(job.Created_At).toLocaleString('th-TH')}</span>
+                            <span>Target: ${job.Target_Audience || '-'}</span>
+                            <span>Media: ${job.Media_Type || '-'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateJobsPageFilterDropdown() {
+            const pageNames = [...new Set(cachedJobs.map(j => j.Page_Name).filter(Boolean))];
+            const select = document.getElementById('jobsPageFilter');
+            select.innerHTML = '<option value="">-- ดูทั้งหมด --</option>' +
+                pageNames.map(name => `<option value="${name}">${name}</option>`).join('');
+            select.value = currentJobsPageFilter;
+        }
+
+        function setJobsFilter(filter) {
+            currentJobsFilter = filter;
+            document.querySelectorAll('.status-filter-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderJobsList();
+        }
+
+        function setJobsPageFilter(pageName) {
+            currentJobsPageFilter = pageName;
+            renderJobsList();
+        }
+
+        function refreshJobsList() {
+            loadJobsList();
+        }
+
+        function checkAuth() {
+            if (!isLoggedIn()) {
+                window.location.href = 'index.html';
+            } else {
+                loadUserInfo();
+                loadJobsList();
+            }
+        }
+
+        window.addEventListener('load', checkAuth);
+    </script>
+</body>
+
+</html>

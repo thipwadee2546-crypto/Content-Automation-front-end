@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - FB AI Content Manager</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --primary-color: #6366f1;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --bg-color: #f8fafc;
+            --glass-white: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-color);
+            color: #1e293b;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Sidebar Glassmorphism */
+        .sidebar {
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            overflow-y: auto;
+            z-index: 50;
+            transition: transform 0.3s ease;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Navigation Items */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            margin: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #64748b;
+            font-weight: 500;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .nav-item.active {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .nav-item i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Cards and Containers */
+        .fb-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid #f1f5f9;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Logo -->
+        <div class="p-6 border-b border-gray-100 flex items-center justify-center">
+            <div
+                class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white mr-3 shadow-lg shadow-indigo-200">
+                <i class="fab fa-facebook-f text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-800 tracking-tight">AI Manager</h1>
+                <p class="text-xs text-slate-400">Content Automation</p>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="mt-8 px-4 space-y-2">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="calendar.html" class="nav-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Calendar</span>
+            </a>
+            <div class="pt-4 pb-2 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Content</div>
+            <a href="content.html" class="nav-item">
+                <i class="fas fa-magic"></i>
+                <span>Create Content</span>
+            </a>
+            <a href="post.html" class="nav-item">
+                <i class="fas fa-paper-plane"></i>
+                <span>Post Content</span>
+            </a>
+            <a href="jobs.html" class="nav-item" id="nav-jobs" style="display: none;">
+                <i class="fas fa-stream"></i>
+                <span>Job Status</span>
+            </a>
+            <div class="pt-4 pb-2 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider" id="nav-admin-header"
+                style="display: none;">
+                Admin</div>
+            <a href="pages.html" class="nav-item">
+                <i class="fas fa-flag"></i>
+                <span>Pages</span>
+            </a>
+            <a href="users.html" class="nav-item" id="nav-users" style="display: none;">
+                <i class="fas fa-users-cog"></i>
+                <span>Users</span>
+            </a>
+        </nav>
+
+        <!-- Divider -->
+        <div class="absolute bottom-0 w-full p-4 border-t border-gray-100 bg-gray-50/50 backdrop-blur-sm">
+            <button onclick="logout()"
+                class="flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium">
+                <i class="fas fa-sign-out-alt w-6"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header Bar -->
+        <div
+            class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-8 py-4 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800" id="pageTitle">Manage Users</h2>
+                <p class="text-sm text-slate-500">Administer system users</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button
+                    class="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 flex items-center justify-center transition-all shadow-sm">
+                    <i class="far fa-bell"></i>
+                </button>
+                <div class="user-profile flex items-center gap-3 pl-2 pr-4 py-1.5 bg-white border border-gray-200 rounded-full hover:border-indigo-300 transition-all cursor-pointer shadow-sm"
+                    onclick="window.location.href='profile.html'">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm"
+                        id="userInitial">A</div>
+                    <div class="hidden md:block">
+                        <p class="text-sm font-bold text-slate-700 leading-tight" id="userDisplay">User</p>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold" id="userRole" style="opacity: 0;"></p>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-300 text-xs ml-2"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="p-8">
+            <div id="users" class="block">
+                <div class="fb-card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">จัดการผู้ใช้งาน</h3>
+                            <p class="text-gray-600 text-sm">เพิ่มผู้ใช้ใหม่และจัดการสิทธิ์การใช้งาน</p>
+                        </div>
+                        <button onclick="showAddUserForm()"
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-600">
+                            <i class="fas fa-user-plus mr-2"></i>เพิ่มผู้ใช้ใหม่
+                        </button>
+                    </div>
+
+                    <!-- Add User Form -->
+                    <div id="userForm" class="bg-gray-50 p-6 rounded-lg mb-6 hidden">
+                        <h4 class="text-lg font-bold mb-4">เพิ่มผู้ใช้ใหม่</h4>
+                        <form onsubmit="addUser(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div>
+                                    <label class="text-sm font-600 text-gray-700">ชื่อผู้ใช้</label>
+                                    <input type="text" id="newUsername" placeholder="ชื่อผู้ใช้"
+                                        class="border rounded px-3 py-2 w-full" required>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-600 text-gray-700">รหัสผ่าน</label>
+                                    <input type="password" id="newPassword" placeholder="รหัสผ่าน"
+                                        class="border rounded px-3 py-2 w-full" required>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-600 text-gray-700">ชื่อเต็ม</label>
+                                    <input type="text" id="newFullName" placeholder="ชื่อเต็ม"
+                                        class="border rounded px-3 py-2 w-full" required>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-600 text-gray-700">Role</label>
+                                    <select id="newRole" class="border rounded px-3 py-2 w-full" required>
+                                        <option value="user">User</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-600">
+                                    <i class="fas fa-save mr-2"></i>บันทึก
+                                </button>
+                                <button type="button" onclick="cancelUserForm()"
+                                    class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded font-600">
+                                    <i class="fas fa-times mr-2"></i>ยกเลิก
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Users List -->
+                    <div id="usersList" class="space-y-3">
+                        <p class="text-gray-500 text-center py-4">กำลังโหลด...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT OTHER USER MODAL -->
+    <div id="editUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 w-96 shadow-xl">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">แก้ไขข้อมูลผู้ใช้</h3>
+            <form onsubmit="submitEditUser(event)" class="space-y-4">
+                <div>
+                    <label class="text-sm font-600 text-gray-700">ชื่อผู้ใช้</label>
+                    <input type="text" id="editUserUsername" class="border rounded px-3 py-2 w-full bg-gray-100"
+                        readonly>
+                </div>
+                <div>
+                    <label class="text-sm font-600 text-gray-700">ชื่อเต็ม (ปล่อยว่างเพื่อไม่แก้ไข)</label>
+                    <input type="text" id="editUserFullName" placeholder="ชื่อเต็มใหม่"
+                        class="border rounded px-3 py-2 w-full">
+                </div>
+                <div>
+                    <label class="text-sm font-600 text-gray-700">รหัสผ่านใหม่ (ปล่อยว่างเพื่อไม่แก้ไข)</label>
+                    <input type="password" id="editUserPassword" placeholder="รหัสผ่านใหม่"
+                        class="border rounded px-3 py-2 w-full">
+                </div>
+                <div>
+                    <label class="text-sm font-600 text-gray-700">Role</label>
+                    <select id="editUserRole" class="border rounded px-3 py-2 w-full">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="flex gap-2 pt-4 border-t">
+                    <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-600 flex-1">
+                        <i class="fas fa-save mr-2"></i>บันทึก
+                    </button>
+                    <button type="button" onclick="closeEditUserModal()"
+                        class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded font-600 flex-1">
+                        <i class="fas fa-times mr-2"></i>ยกเลิก
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script src="config.js"></script>
+    <script>
+        const API_BASE = CONFIG.API_BASE;
+        let editingUserId = null;
+
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+
+        function isLoggedIn() {
+            return !!getToken();
+        }
+
+        function logout() {
+            if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('username');
+                window.location.href = 'index.html';
+            }
+        }
+
+        function showAdminOnlyLinks() {
+            const navJobs = document.getElementById('nav-jobs');
+            const navUsers = document.getElementById('nav-users');
+            const navAdminHeader = document.getElementById('nav-admin-header');
+            if (navJobs) navJobs.style.display = '';
+            if (navUsers) navUsers.style.display = '';
+            if (navAdminHeader) navAdminHeader.style.display = '';
+        }
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!response.ok) throw new Error('Unauthorized');
+
+                const user = await response.json();
+                const initial = user.username.charAt(0).toUpperCase();
+
+                document.getElementById('userDisplay').textContent = user.username;
+                document.getElementById('userInitial').textContent = initial;
+
+                // Set role display
+                const roleEl = document.getElementById('userRole');
+                if (roleEl) {
+                    roleEl.textContent = user.role === 'admin' ? 'Admin' : 'User';
+                    roleEl.style.opacity = '1';
+                    roleEl.style.transition = 'opacity 0.3s ease-in';
+                }
+
+                if (user.role === 'admin') {
+                    showAdminOnlyLinks();
+                }
+
+            } catch (error) {
+                console.error('Failed to load user info:', error);
+                logout();
+            }
+        }
+
+        async function loadUsersList() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/users`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 403) throw new Error('ต้องการสิทธิ์ Admin');
+                    throw new Error('Failed to load users');
+                }
+
+                const users = await response.json();
+                const usersList = document.getElementById('usersList');
+
+                if (users.length === 0) {
+                    usersList.innerHTML = '<p class="text-gray-500 text-center py-4">ไม่พบผู้ใช้งาน</p>';
+                    return;
+                }
+
+                usersList.innerHTML = users.map(u => `
+                    <div class="bg-white border rounded-lg p-4 flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold text-gray-800">${u.username} <span class="text-xs text-gray-500 font-normal">(${u.role})</span></h4>
+                            <p class="text-sm text-gray-600">${u.full_name || '-'}</p>
+                        </div>
+                         <div class="flex gap-2">
+                             <button onclick="openEditUserModal(${u.id}, '${u.username}', '${u.full_name || ''}', '${u.role}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                                <i class="fas fa-edit"></i> แก้ไข
+                            </button>
+                            <button onclick="deleteUser(${u.id}, '${u.username}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                                <i class="fas fa-trash"></i> ลบ
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('usersList').innerHTML = `<p class="text-red-500 text-center">${error.message}</p>`;
+            }
+        }
+
+        function showAddUserForm() {
+            document.getElementById('userForm').classList.remove('hidden');
+        }
+
+        function cancelUserForm() {
+            document.getElementById('userForm').classList.add('hidden');
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('newFullName').value = '';
+        }
+
+        async function addUser(event) {
+            event.preventDefault();
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const fullName = document.getElementById('newFullName').value;
+            const role = document.getElementById('newRole').value;
+
+            if (!username || !password) {
+                alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
+                return;
+            }
+
+            try {
+                // Register is usually public, but we can also treat it as an admin action if we want.
+                // However, the API endpoint /auth/register is currently public.
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, full_name: fullName, role })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) throw new Error(data.detail || 'Failed to register user');
+
+                alert('เพิ่มผู้ใช้สำเร็จ');
+                cancelUserForm();
+                loadUsersList(); // Refresh list
+
+            } catch (error) {
+                alert('❌ ' + error.message);
+            }
+        }
+
+        function openEditUserModal(id, username, fullName, role) {
+            editingUserId = id;
+            document.getElementById('editUserUsername').value = username;
+            document.getElementById('editUserFullName').value = fullName;
+            document.getElementById('editUserRole').value = role;
+            document.getElementById('editUserPassword').value = '';
+            document.getElementById('editUserModal').classList.remove('hidden');
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').classList.add('hidden');
+            editingUserId = null;
+        }
+
+        async function submitEditUser(event) {
+            event.preventDefault();
+            if (!editingUserId) {
+                console.log('No editingUserId set');
+                return;
+            }
+
+            const fullName = document.getElementById('editUserFullName').value;
+            const password = document.getElementById('editUserPassword').value;
+            const role = document.getElementById('editUserRole').value;
+
+            const updateData = {};
+            if (fullName) updateData.full_name = fullName;
+            if (password) updateData.password = password;
+            if (role) updateData.role = role;
+
+            console.log('Editing user ID:', editingUserId);
+            console.log('Update data:', updateData);
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/users/${editingUserId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to update user');
+                }
+
+                alert('แก้ไขข้อมูลสำเร็จ');
+                closeEditUserModal();
+                loadUsersList();
+
+            } catch (error) {
+                console.error('Edit error:', error);
+                alert('❌ ' + error.message);
+            }
+        }
+
+        async function deleteUser(id, username) {
+            if (!confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้ ${username}?`)) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/users/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.detail || 'Failed to delete user');
+                }
+
+                alert('ลบผู้ใช้สำเร็จ');
+                loadUsersList();
+
+            } catch (error) {
+                alert('❌ ' + error.message);
+            }
+        }
+
+        function checkAuth() {
+            if (!isLoggedIn()) {
+                window.location.href = 'index.html';
+            } else {
+                loadUserInfo();
+                loadUsersList();
+            }
+        }
+
+        window.addEventListener('load', checkAuth);
+    </script>
+</body>
+
+</html>

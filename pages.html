@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Pages - FB AI Content Manager</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --sidebar-width: 280px;
+            --primary-color: #6366f1;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --bg-color: #f8fafc;
+            --glass-white: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-color);
+            color: #1e293b;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Sidebar Glassmorphism */
+        .sidebar {
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            overflow-y: auto;
+            z-index: 50;
+            transition: transform 0.3s ease;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Navigation Items */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            margin: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #64748b;
+            font-weight: 500;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .nav-item.active {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .nav-item i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Cards and Containers */
+        .fb-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid #f1f5f9;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Logo -->
+        <div class="p-6 border-b border-gray-100 flex items-center justify-center">
+            <div
+                class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white mr-3 shadow-lg shadow-indigo-200">
+                <i class="fab fa-facebook-f text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-slate-800 tracking-tight">AI Manager</h1>
+                <p class="text-xs text-slate-400">Content Automation</p>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="mt-8 px-4 space-y-2">
+            <a href="dashboard.html" class="nav-item">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="calendar.html" class="nav-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Calendar</span>
+            </a>
+            <div class="pt-4 pb-2 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Content</div>
+            <a href="content.html" class="nav-item">
+                <i class="fas fa-magic"></i>
+                <span>Create Content</span>
+            </a>
+            <a href="post.html" class="nav-item">
+                <i class="fas fa-paper-plane"></i>
+                <span>Post Content</span>
+            </a>
+            <a href="jobs.html" class="nav-item" id="nav-jobs" style="display: none;">
+                <i class="fas fa-stream"></i>
+                <span>Job Status</span>
+            </a>
+            <div class="pt-4 pb-2 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider" id="nav-admin-header"
+                style="display: none;">
+                Admin</div>
+            <a href="pages.html" class="nav-item active">
+                <i class="fas fa-flag"></i>
+                <span>Pages</span>
+            </a>
+            <a href="users.html" class="nav-item" id="nav-users" style="display: none;">
+                <i class="fas fa-users-cog"></i>
+                <span>Users</span>
+            </a>
+        </nav>
+
+        <!-- Divider -->
+        <div class="absolute bottom-0 w-full p-4 border-t border-gray-100 bg-gray-50/50 backdrop-blur-sm">
+            <button onclick="logout()"
+                class="flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium">
+                <i class="fas fa-sign-out-alt w-6"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header Bar -->
+        <div
+            class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-8 py-4 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800" id="pageTitle">Manage Pages</h2>
+                <p class="text-sm text-slate-500">Connect and manage Facebook Pages</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button
+                    class="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 flex items-center justify-center transition-all shadow-sm">
+                    <i class="far fa-bell"></i>
+                </button>
+                <div class="user-profile flex items-center gap-3 pl-2 pr-4 py-1.5 bg-white border border-gray-200 rounded-full hover:border-indigo-300 transition-all cursor-pointer shadow-sm"
+                    onclick="window.location.href='profile.html'">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm"
+                        id="userInitial">A</div>
+                    <div class="hidden md:block">
+                        <p class="text-sm font-bold text-slate-700 leading-tight" id="userDisplay">User</p>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold" id="userRole" style="opacity: 0;"></p>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-300 text-xs ml-2"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="p-8">
+            <div id="pages" class="block">
+                <div class="fb-card p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-800">จัดการเพจ Facebook</h3>
+                            <p class="text-gray-600 text-sm">เพิ่ม แก้ไข และลบเพจของคุณ</p>
+                        </div>
+                        <button onclick="showAddPageForm()"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-600">
+                            <i class="fas fa-plus mr-2"></i>เพิ่มเพจใหม่
+                        </button>
+                    </div>
+
+                    <!-- Add/Edit Page Form -->
+                    <div id="pageForm" class="bg-gray-50 p-6 rounded-lg mb-6 hidden">
+                        <h4 class="text-lg font-bold mb-4" id="pageFormTitle">เพิ่มเพจใหม่</h4>
+                        <form onsubmit="savePage(event)" class="space-y-4">
+                            <input type="hidden" id="pageDbId">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="text-sm font-600 text-gray-700">ชื่อเพจ</label>
+                                    <input type="text" id="pageName" placeholder="ชื่อเพจ"
+                                        class="border rounded px-3 py-2 w-full" required>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-600 text-gray-700">Page ID</label>
+                                    <input type="text" id="pageId" placeholder="Page ID"
+                                        class="border rounded px-3 py-2 w-full" required>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-600 text-gray-700">Access Token</label>
+                                    <input type="text" id="pageToken" placeholder="Access Token"
+                                        class="border rounded px-3 py-2 w-full" required>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit"
+                                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-600">
+                                    <i class="fas fa-save mr-2"></i>บันทึก
+                                </button>
+                                <button type="button" onclick="cancelPageForm()"
+                                    class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded font-600">
+                                    <i class="fas fa-times mr-2"></i>ยกเลิก
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Pages List -->
+                    <div id="pagesList" class="space-y-3">
+                        <p class="text-gray-500 text-center py-4">กำลังโหลด...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const API_BASE = CONFIG.API_BASE;
+
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+
+        function isLoggedIn() {
+            return !!getToken();
+        }
+
+        function logout() {
+            if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('username');
+                window.location.href = 'index.html';
+            }
+        }
+
+        function showAdminOnlyLinks() {
+            const navJobs = document.getElementById('nav-jobs');
+            const navUsers = document.getElementById('nav-users');
+            const navAdminHeader = document.getElementById('nav-admin-header');
+            if (navJobs) navJobs.style.display = '';
+            if (navUsers) navUsers.style.display = '';
+            if (navAdminHeader) navAdminHeader.style.display = '';
+        }
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!response.ok) throw new Error('Unauthorized');
+
+                const user = await response.json();
+                const initial = user.username.charAt(0).toUpperCase();
+
+                document.getElementById('userDisplay').textContent = user.username;
+                document.getElementById('userInitial').textContent = initial;
+
+                // Set role display
+                const roleEl = document.getElementById('userRole');
+                if (roleEl) {
+                    roleEl.textContent = user.role === 'admin' ? 'Admin' : 'User';
+                    roleEl.style.opacity = '1';
+                    roleEl.style.transition = 'opacity 0.3s ease-in';
+                }
+
+                if (user.role === 'admin') {
+                    showAdminOnlyLinks();
+                }
+
+            } catch (error) {
+                console.error('Failed to load user info:', error);
+                logout();
+            }
+        }
+
+        async function loadPagesList() {
+            try {
+                const response = await fetch(`${API_BASE}/pages`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load pages');
+
+                const pages = await response.json();
+                const pagesList = document.getElementById('pagesList');
+
+                if (pages.length === 0) {
+                    pagesList.innerHTML = '<p class="text-gray-500 text-center py-4">ไม่มีเพจในระบบ</p>';
+                    return;
+                }
+
+                pagesList.innerHTML = pages.map(page => `
+                    <div class="bg-white border rounded-lg p-4 flex justify-between items-center">
+                        <div>
+                            <h4 class="font-bold text-gray-800">${page.name}</h4>
+                            <p class="text-sm text-gray-600">Page ID: ${page.page_id}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="editPage(${page.id}, '${page.name}', '${page.page_id}', '${page.access_token}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
+                                <i class="fas fa-edit"></i> แก้ไข
+                            </button>
+                            <button onclick="deletePage(${page.id})" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                                <i class="fas fa-trash"></i> ลบ
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Error loading pages:', error);
+                document.getElementById('pagesList').innerHTML = '<p class="text-red-500 text-center">ไม่สามารถโหลดเพจได้</p>';
+            }
+        }
+
+        function showAddPageForm() {
+            document.getElementById('pageDbId').value = '';
+            document.getElementById('pageName').value = '';
+            document.getElementById('pageId').value = '';
+            document.getElementById('pageToken').value = '';
+            document.getElementById('pageFormTitle').textContent = 'เพิ่มเพจใหม่';
+            document.getElementById('pageForm').classList.remove('hidden');
+        }
+
+        function editPage(dbId, name, pageId, token) {
+            document.getElementById('pageDbId').value = dbId;
+            document.getElementById('pageName').value = name;
+            document.getElementById('pageId').value = pageId;
+            document.getElementById('pageToken').value = token;
+            document.getElementById('pageFormTitle').textContent = 'แก้ไขเพจ';
+            document.getElementById('pageForm').classList.remove('hidden');
+        }
+
+        function cancelPageForm() {
+            document.getElementById('pageForm').classList.add('hidden');
+        }
+
+        async function savePage(event) {
+            event.preventDefault();
+
+            const dbId = document.getElementById('pageDbId').value;
+            const name = document.getElementById('pageName').value;
+            const pageId = document.getElementById('pageId').value;
+            const token = document.getElementById('pageToken').value;
+
+            const isUpdate = !!dbId;
+            const url = isUpdate ? `${API_BASE}/pages/${dbId}` : `${API_BASE}/pages`;
+            const method = isUpdate ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getToken()}`
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        page_id: pageId,
+                        access_token: token
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to save page');
+
+                alert(isUpdate ? 'อัปเดตเพจสำเร็จ' : 'เพิ่มเพจสำเร็จ');
+                cancelPageForm();
+                loadPagesList();
+
+            } catch (error) {
+                alert('❌ ' + error.message);
+            }
+        }
+
+        async function deletePage(pageId) {
+            if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบเพจนี้?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/pages/${pageId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to delete page');
+
+                alert('ลบเพจสำเร็จ');
+                loadPagesList();
+
+            } catch (error) {
+                alert('❌ ' + error.message);
+            }
+        }
+
+        function checkAuth() {
+            if (!isLoggedIn()) {
+                window.location.href = 'index.html';
+            } else {
+                loadUserInfo();
+                loadPagesList();
+            }
+        }
+
+        window.addEventListener('load', checkAuth);
+    </script>
+</body>
+
+</html>
