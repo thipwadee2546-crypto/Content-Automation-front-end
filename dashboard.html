@@ -373,7 +373,7 @@
         async function loadUserInfo() {
             try {
                 const response = await fetch(`${API_BASE}/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
 
                 if (!response.ok) throw new Error('Unauthorized');
@@ -408,7 +408,7 @@
         async function loadDashboardStats() {
             try {
                 const response = await fetch(`${API_BASE}/stats/job-summary`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
 
                 if (!response.ok) throw new Error('Failed to load stats');

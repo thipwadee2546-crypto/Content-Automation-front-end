@@ -338,7 +338,7 @@
         async function loadUserInfo() {
             try {
                 const response = await fetch(`${API_BASE}/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
 
                 if (!response.ok) throw new Error('Unauthorized');
@@ -370,7 +370,7 @@
         async function loadPages() {
             try {
                 const response = await fetch(`${API_BASE}/pages`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
                 const pages = await response.json();
                 availablePages = pages;
@@ -390,7 +390,7 @@
         async function loadPostsList() {
             try {
                 const response = await fetch(`${API_BASE}/posts/list`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
 
                 if (!response.ok) return;
@@ -460,7 +460,8 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getToken()}`
+                        'Authorization': `Bearer ${getToken()}`,
+                        'ngrok-skip-browser-warning': 'true'
                     },
                     body: JSON.stringify({
                         page_id: selectedPage.page_id,
@@ -489,7 +490,7 @@
             try {
                 await fetch(`${API_BASE}/posts/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
                 loadPostsList();
             } catch (e) {

@@ -6,18 +6,18 @@
 const CONFIG = {
     // API Base URL
     API_BASE: "https://itzel-unfoiled-diphtheritically.ngrok-free.dev",
-    
+
     // Token storage key
     TOKEN_KEY: "access_token",
     USERNAME_KEY: "username",
-    
+
     // ตั้งค่า timeout (milliseconds)
     REQUEST_TIMEOUT: 30000,
-    
+
     // URLs
     LOGIN_URL: "index.html",
     DASHBOARD_URL: "dashboard.html",
-    
+
     // Default settings
     TOKEN_EXPIRY_MINUTES: 30
 };
@@ -59,28 +59,29 @@ async function apiCall(endpoint, options = {}) {
     const url = getApiUrl(endpoint);
     const headers = {
         "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
         ...options.headers
     };
-    
+
     // เพิ่ม Authorization token ถ้ามี
     const token = getToken();
     if (token) {
         headers["Authorization"] = `Bearer ${token}`;
     }
-    
+
     try {
         const response = await fetch(url, {
             ...options,
             headers,
             timeout: CONFIG.REQUEST_TIMEOUT
         });
-        
+
         // ถ้า 401 Unauthorized ให้ redirect ไป login
         if (response.status === 401) {
             clearToken();
             window.location.href = CONFIG.LOGIN_URL;
         }
-        
+
         return response;
     } catch (error) {
         console.error("API Call Error:", error);

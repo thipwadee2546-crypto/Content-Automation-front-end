@@ -320,7 +320,7 @@
         async function loadUserInfo() {
             try {
                 const response = await fetch(`${API_BASE}/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
 
                 if (!response.ok) throw new Error('Unauthorized');
@@ -352,7 +352,7 @@
         async function loadGeneratedContent() {
             try {
                 const response = await fetch(`${API_BASE}/content/list`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
                 if (!response.ok) return;
 
@@ -428,7 +428,8 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getToken()}`
+                        'Authorization': `Bearer ${getToken()}`,
+                        'ngrok-skip-browser-warning': 'true'
                     },
                     body: JSON.stringify({
                         product_name: product,
@@ -470,7 +471,7 @@
             try {
                 await fetch(`${API_BASE}/content/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
                 loadGeneratedContent();
             } catch (e) {

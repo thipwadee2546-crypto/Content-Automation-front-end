@@ -37,7 +37,7 @@ const AUTH = {
 
         try {
             const response = await fetch(`${API_BASE}/auth/me`, {
-                headers: { 'Authorization': `Bearer ${this.getToken()}` }
+                headers: { 'Authorization': `Bearer ${this.getToken()}`, 'ngrok-skip-browser-warning': 'true' }
             });
 
             if (!response.ok) throw new Error('Unauthorized');

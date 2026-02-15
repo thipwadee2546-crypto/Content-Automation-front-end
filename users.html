@@ -349,7 +349,7 @@
         async function loadUserInfo() {
             try {
                 const response = await fetch(`${API_BASE}/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
 
                 if (!response.ok) throw new Error('Unauthorized');
@@ -381,7 +381,7 @@
         async function loadUsersList() {
             try {
                 const response = await fetch(`${API_BASE}/auth/users`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
 
                 if (!response.ok) {
@@ -448,7 +448,7 @@
                 // However, the API endpoint /auth/register is currently public.
                 const response = await fetch(`${API_BASE}/auth/register`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
                     body: JSON.stringify({ username, password, full_name: fullName, role })
                 });
 
@@ -503,7 +503,8 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getToken()}`
+                        'Authorization': `Bearer ${getToken()}`,
+                        'ngrok-skip-browser-warning': 'true'
                     },
                     body: JSON.stringify(updateData)
                 });
@@ -532,7 +533,7 @@
             try {
                 const response = await fetch(`${API_BASE}/auth/users/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
 
                 if (!response.ok) {

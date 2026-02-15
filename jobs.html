@@ -230,14 +230,14 @@
             <div class="pt-4 pb-2 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider" id="nav-admin-header"
                 style="display: none;">
                 Admin</div>
-                <a href="pages.html" class="nav-item">
-                    <i class="fas fa-flag"></i>
-                    <span>Pages</span>
-                </a>
-                <a href="users.html" class="nav-item" id="nav-users" style="display: none;">
-                    <i class="fas fa-users-cog"></i>
-                    <span>Users</span>
-                </a>
+            <a href="pages.html" class="nav-item">
+                <i class="fas fa-flag"></i>
+                <span>Pages</span>
+            </a>
+            <a href="users.html" class="nav-item" id="nav-users" style="display: none;">
+                <i class="fas fa-users-cog"></i>
+                <span>Users</span>
+            </a>
         </nav>
 
         <!-- Divider -->
@@ -361,7 +361,7 @@
         async function loadUserInfo() {
             try {
                 const response = await fetch(`${API_BASE}/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
 
                 if (!response.ok) throw new Error('Unauthorized');
@@ -393,7 +393,7 @@
         async function loadJobsList() {
             try {
                 const response = await fetch(`${API_BASE}/jobs/status-posts`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
 
                 if (!response.ok) throw new Error('Failed to load jobs');

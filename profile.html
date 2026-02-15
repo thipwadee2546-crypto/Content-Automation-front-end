@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,11 +21,13 @@
             --bg-color: #f8fafc;
             --glass-white: rgba(255, 255, 255, 0.9);
         }
+
         body {
             font-family: 'Sarabun', sans-serif;
             background-color: var(--bg-color);
             color: #1e293b;
         }
+
         h1,
         h2,
         h3,
@@ -33,6 +36,7 @@
         h6 {
             font-family: 'Outfit', sans-serif;
         }
+
         /* Sidebar Glassmorphism */
         .sidebar {
             background: white;
@@ -46,22 +50,27 @@
             z-index: 50;
             transition: transform 0.3s ease;
         }
+
         .main-content {
             margin-left: var(--sidebar-width);
             transition: margin-left 0.3s ease;
             min-height: 100vh;
         }
+
         @media (max-width: 1024px) {
             .sidebar {
                 transform: translateX(-100%);
             }
+
             .sidebar.mobile-active {
                 transform: translateX(0);
             }
+
             .main-content {
                 margin-left: 0;
             }
         }
+
         /* Navigation Items */
         .nav-item {
             display: flex;
@@ -77,21 +86,25 @@
             position: relative;
             overflow: hidden;
         }
+
         .nav-item:hover {
             background: #f1f5f9;
             color: #334155;
         }
+
         .nav-item.active {
             background: var(--primary-gradient);
             color: white;
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
         }
+
         .nav-item i {
             width: 24px;
             margin-right: 12px;
             text-align: center;
             font-size: 1.1rem;
         }
+
         /* Cards and Containers */
         .fb-card {
             background: white;
@@ -102,6 +115,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
@@ -265,7 +279,7 @@
         async function loadUserInfo() {
             try {
                 const response = await fetch(`${API_BASE}/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
                 if (!response.ok) throw new Error('Unauthorized');
                 const user = await response.json();
@@ -311,7 +325,8 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getToken()}`
+                        'Authorization': `Bearer ${getToken()}`,
+                        'ngrok-skip-browser-warning': 'true'
                     },
                     body: JSON.stringify(updateData)
                 });
@@ -335,4 +350,5 @@
         window.addEventListener('load', checkAuth);
     </script>
 </body>
+
 </html>
