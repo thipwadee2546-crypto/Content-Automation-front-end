@@ -306,6 +306,7 @@
     </div>
 
     <script src="config.js"></script>
+    <script src="form-persist.js"></script>
     <script>
         const API_BASE = CONFIG.API_BASE;
         let availablePages = [];
@@ -476,12 +477,13 @@
 
                 if (!response.ok) throw new Error('Create post failed');
 
-                alert('สร้างโพสต์สำเร็จ!');
+                Toast.show('สร้างโพสต์สำเร็จ!', 'success');
                 document.getElementById('createPostForm').reset();
+                FormPersist.clear();
                 loadPostsList();
 
             } catch (e) {
-                alert('Error: ' + e.message);
+                Toast.show('Error: ' + e.message, 'error');
             }
         });
 
@@ -505,6 +507,13 @@
                 loadUserInfo();
                 loadPages();
                 loadPostsList();
+
+                // Form persistence — จำค่าที่พิมพ์แม้เปลี่ยนหน้า
+                FormPersist.init('post', ['pageSelect', 'postCaption', 'mediaUrl', 'postMediaType', 'scheduleTime']);
+
+                // Auto-refresh post list
+                AutoRefresh.start('postList', loadPostsList, 15000);
+                AutoRefresh.pauseWhileTyping('createPostForm');
             }
         }
 

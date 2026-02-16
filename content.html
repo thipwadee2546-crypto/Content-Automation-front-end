@@ -289,6 +289,7 @@
     </div>
 
     <script src="config.js"></script>
+    <script src="form-persist.js"></script>
     <script>
         const API_BASE = CONFIG.API_BASE;
 
@@ -443,13 +444,14 @@
 
                 const result = await response.json();
 
-                // Clear form
+                // Clear form + clear saved draft
                 document.getElementById('createJobForm').reset();
+                FormPersist.clear();
 
                 // Reload list immediately to show placeholder
                 loadGeneratedContent();
 
-                alert('Content generation started!');
+                Toast.show('Content generation started!', 'success');
 
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -462,7 +464,7 @@
         function copyToClipboard(text) {
             if (!text) return;
             navigator.clipboard.writeText(text).then(() => {
-                alert('Copied to clipboard!');
+                Toast.show('Copied to clipboard!', 'success');
             });
         }
 
@@ -485,8 +487,13 @@
             } else {
                 loadUserInfo();
                 loadGeneratedContent();
-                // Polling for status updates every 5 seconds
-                setInterval(loadGeneratedContent, 5000);
+
+                // Form persistence — จำค่าที่พิมพ์แม้เปลี่ยนหน้า
+                FormPersist.init('content', ['productName', 'productDesc', 'targetAudience', 'mediaType']);
+
+                // Auto-refresh — อัปเดทรายการอัตโนมัติ
+                AutoRefresh.start('contentList', loadGeneratedContent, 10000);
+                AutoRefresh.pauseWhileTyping('createJobForm');
             }
         }
 

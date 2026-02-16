@@ -341,6 +341,7 @@
     </div>
 
     <script src="config.js"></script>
+    <script src="form-persist.js"></script>
     <script>
         const API_BASE = CONFIG.API_BASE;
 
@@ -431,6 +432,9 @@
             } else {
                 loadUserInfo();
                 loadDashboardStats();
+
+                // Auto-refresh stats ทุก 30 วินาที
+                AutoRefresh.start('dashboardStats', loadDashboardStats, 30000);
             }
         }
 
