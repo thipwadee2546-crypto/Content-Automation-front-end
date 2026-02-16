@@ -388,9 +388,9 @@
                                 <i class="far fa-copy mr-2"></i>Copy
                             </button>
                             ${item.media_url ?
-                        `<a href="${item.media_url}" target="_blank" download class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 rounded-lg text-sm font-medium transition-colors text-center flex items-center justify-center decoration-0">
+                        `<button onclick="downloadFile('${item.media_url}')" class="flex-1 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 py-2 rounded-lg text-sm font-medium transition-colors text-center flex items-center justify-center">
                                     <i class="fas fa-download mr-2"></i>Download
-                                </a>` :
+                                </button>` :
                         `<button disabled class="flex-1 bg-white border border-gray-300 text-gray-300 py-2 rounded-lg text-sm font-medium cursor-not-allowed">
                                     <i class="fas fa-download mr-2"></i>Download
                                 </button>`
@@ -466,6 +466,42 @@
             navigator.clipboard.writeText(text).then(() => {
                 Toast.show('Copied to clipboard!', 'success');
             });
+        }
+
+        async function downloadFile(url) {
+            Toast.show('กำลังดาวน์โหลด...', 'info', 5000);
+            try {
+                const proxyUrl = `${API_BASE}/proxy-download?url=${encodeURIComponent(url)}`;
+                const response = await fetch(proxyUrl, {
+                    headers: {
+                        'Authorization': `Bearer ${getToken()}`,
+                        'ngrok-skip-browser-warning': 'true'
+                    }
+                });
+                if (!response.ok) throw new Error('Download failed');
+
+                const blob = await response.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+
+                // Extract filename from Content-Disposition or URL
+                const cd = response.headers.get('Content-Disposition');
+                let filename = 'download';
+                if (cd && cd.includes('filename=')) {
+                    filename = cd.split('filename=')[1].replace(/"/g, '').trim();
+                } else {
+                    filename = url.split('/').pop() || 'download';
+                }
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(a.href);
+                Toast.show('ดาวน์โหลดสำเร็จ!', 'success');
+            } catch (e) {
+                Toast.show('ดาวน์โหลดไม่สำเร็จ', 'error');
+                console.error('Download error:', e);
+            }
         }
 
         async function deleteContent(id) {
