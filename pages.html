@@ -216,9 +216,9 @@
                     <div class="flex justify-between items-center mb-6">
                         <div>
                             <h3 class="text-lg font-bold text-gray-800">จัดการเพจ Facebook</h3>
-                            <p class="text-gray-600 text-sm">เพิ่ม แก้ไข และลบเพจของคุณ</p>
+                            <p class="text-gray-600 text-sm" id="pagesSubtitle">รายการเพจทั้งหมดในระบบ</p>
                         </div>
-                        <button onclick="showAddPageForm()"
+                        <button id="btnAddPage" onclick="showAddPageForm()" style="display: none;"
                             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-600">
                             <i class="fas fa-plus mr-2"></i>เพิ่มเพจใหม่
                         </button>
@@ -272,6 +272,7 @@
     <script src="form-persist.js"></script>
     <script>
         const API_BASE = CONFIG.API_BASE;
+        let currentUserRole = 'user';
 
         function getToken() {
             return localStorage.getItem('access_token');
@@ -322,6 +323,10 @@
 
                 if (user.role === 'admin') {
                     showAdminOnlyLinks();
+                    currentUserRole = 'admin';
+                    // Show admin page controls
+                    document.getElementById('btnAddPage').style.display = '';
+                    document.getElementById('pagesSubtitle').textContent = 'เพิ่ม แก้ไข และลบเพจได้ (Admin)';
                 }
 
             } catch (error) {
@@ -354,18 +359,21 @@
                         ? `<img src="${page.avatar_url}" class="w-12 h-12 rounded-full object-cover border-2 border-gray-200">`
                         : `<div class="w-12 h-12 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg font-bold border-2 border-gray-200">${page.name.charAt(0).toUpperCase()}</div>`
                     }
+                                ${currentUserRole === 'admin' ? `
                                 <button onclick="document.getElementById('avatarInput_${page.id}').click()"
                                     class="absolute inset-0 w-12 h-12 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                                     <i class="fas fa-camera text-sm"></i>
                                 </button>
                                 <input type="file" id="avatarInput_${page.id}" accept="image/*" class="hidden"
                                     onchange="uploadAvatar(${page.id}, this)">
+                                ` : ''}
                             </div>
                             <div>
                                 <h4 class="font-bold text-gray-800">${page.name}</h4>
                                 <p class="text-sm text-gray-600">Page ID: ${page.page_id}</p>
                             </div>
                         </div>
+                        ${currentUserRole === 'admin' ? `
                         <div class="flex gap-2">
                             <button onclick="editPage(${page.id}, '${page.name}', '${page.page_id}', '${page.access_token}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">
                                 <i class="fas fa-edit"></i> แก้ไข
@@ -374,6 +382,7 @@
                                 <i class="fas fa-trash"></i> ลบ
                             </button>
                         </div>
+                        ` : ''}
                     </div>
                 `).join('');
 
@@ -493,11 +502,11 @@
             }
         }
 
-        function checkAuth() {
+        async function checkAuth() {
             if (!isLoggedIn()) {
                 window.location.href = 'index.html';
             } else {
-                loadUserInfo();
+                await loadUserInfo();  // ต้องรอให้รู้ role ก่อน
                 loadPagesList();
             }
         }
