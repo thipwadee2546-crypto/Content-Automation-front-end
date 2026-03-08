@@ -337,15 +337,66 @@
                             </div>
                             <div>
                                 <h3 class="text-lg font-bold text-gray-800">Posting Status</h3>
-                                <p class="text-gray-500 text-sm">Scheduled and published posts</p>
+                                <p class="text-gray-500 text-sm">โพสต์ที่ส่งแล้วและรอดำเนินการ</p>
                             </div>
                         </div>
 
-                        <div id="postsList" class="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                            <p class="text-center text-gray-400 py-8">No posts found.</p>
+                        <div id="postsList" class="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                            <p class="text-center text-gray-400 py-8">ไม่พบโพสต์</p>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Edit Modal -->
+    <div id="postEditModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center" style="display:none">
+        <div class="bg-white rounded-2xl shadow-2xl w-[90%] max-w-lg max-h-[85vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">แก้ไขโพสต์</h3>
+                <button onclick="closePostEditModal()"
+                    class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <input type="hidden" id="peditPostId">
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm font-semibold text-gray-600 block mb-1">ชื่อสินค้า / Topic</label>
+                    <input type="text" id="peditProductName"
+                        class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none">
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-gray-600 block mb-1">Caption</label>
+                    <textarea id="peditCaption" rows="5"
+                        class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none"></textarea>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-gray-600 block mb-1">Media URL</label>
+                    <input type="text" id="peditMediaUrl"
+                        class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-sm font-semibold text-gray-600 block mb-1">ประเภทสื่อ</label>
+                        <select id="peditMediaType"
+                            class="w-full border rounded-xl p-3 text-sm">
+                            <option value="image">รูปภาพ</option>
+                            <option value="video">วิดีโอ</option>
+                            <option value="text">ข้อความ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-gray-600 block mb-1">นัดโพสต์</label>
+                        <input type="datetime-local" id="peditScheduledTime"
+                            class="w-full border rounded-xl p-3 text-sm">
+                    </div>
+                </div>
+                <button onclick="savePostEdit()"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors">
+                    <i class="fas fa-save mr-2"></i>บันทึก
+                </button>
             </div>
         </div>
     </div>
@@ -483,44 +534,130 @@
                 const listContainer = document.getElementById('postsList');
 
                 if (posts.length === 0) {
-                    listContainer.innerHTML = '<p class="text-center text-gray-400 py-8">No posts found.</p>';
+                    listContainer.innerHTML = '<p class="text-center text-gray-400 py-8">ไม่พบโพสต์</p>';
                     return;
                 }
 
-                listContainer.innerHTML = posts.map(post => `
-                    <div class="border border-gray-100 rounded-xl p-4 hover:shadow-md transition-shadow bg-gray-50">
-                        <div class="flex justify-between items-start mb-2">
-                             <div>
-                                <div class="text-xs text-gray-500 font-bold uppercase tracking-wider mb-1"><i class="fab fa-facebook mr-1"></i> ${post.page_name}</div>
-                                <div class="text-sm font-bold ${post.status === 'published' ? 'text-green-600' : 'text-amber-600'}">
-                                    <i class="fas fa-circle text-[8px] mr-1"></i> ${post.status.toUpperCase()}
-                                </div>
-                             </div>
-                             <div class="text-right">
-                                <div class="text-xs text-gray-400">${new Date(post.created_at).toLocaleDateString()}</div>
-                                 ${post.scheduled_time ? `<div class="text-xs text-blue-500 font-medium"><i class="fas fa-clock mr-1"></i> ${new Date(post.scheduled_time).toLocaleString()}</div>` : ''}
-                             </div>
-                        </div>
-                        
-                        <div class="bg-white p-3 rounded-lg border border-gray-200 mb-3 text-sm text-gray-600 line-clamp-3">
-                            ${post.caption}
-                        </div>
-                        
-                         ${post.media_url ?
-                        `<div class="mb-3 text-xs text-blue-500 truncate"><i class="fas fa-link mr-1"></i> ${post.media_url}</div>` : ''
-                    }
+                const statusConfig = {
+                    'pending': { label: 'รออนุมัติ', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200' },
+                    'approved': { label: 'อนุมัติแล้ว', color: 'text-green-600', bg: 'bg-green-50 border-green-200' },
+                    'published': { label: 'โพสต์แล้ว', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200' },
+                    'failed': { label: 'ผิดพลาด', color: 'text-red-600', bg: 'bg-red-50 border-red-200' },
+                    'rejected': { label: 'ไม่อนุมัติ', color: 'text-gray-500', bg: 'bg-gray-50 border-gray-200' },
+                    'publishing': { label: 'กำลังโพสต์...', color: 'text-purple-600', bg: 'bg-purple-50 border-purple-200' },
+                };
 
-                        <div class="flex justify-end border-t border-gray-100 pt-2">
-                            <button onclick="deletePost(${post.id})" class="text-red-500 hover:text-red-700 text-sm font-medium transition-colors">
-                                <i class="fas fa-trash-alt mr-1"></i> Delete
+                listContainer.innerHTML = posts.map(post => {
+                    const st = statusConfig[post.status] || { label: post.status, color: 'text-gray-600', bg: 'bg-gray-50 border-gray-200' };
+                    const canEdit = ['pending', 'failed', 'approved'].includes(post.status);
+                    const title = post.product_name || `Post #${post.id}`;
+                    const captionPreview = post.caption ? (post.caption.length > 80 ? post.caption.substring(0, 80) + '...' : post.caption) : '-';
+
+                    const scheduledText = post.scheduled_time
+                        ? `<span class="text-blue-500"><i class="fas fa-clock mr-1"></i>${new Date(post.scheduled_time).toLocaleString('th-TH')}</span>`
+                        : '';
+
+                    const actionButtons = canEdit
+                        ? `<div class="flex gap-2 mt-2 pt-2 border-t border-gray-100">
+                            <button onclick="editPostInline(${post.id})" class="text-indigo-500 hover:text-indigo-700 text-sm font-medium transition-colors">
+                                <i class="fas fa-edit mr-1"></i>แก้ไข
                             </button>
+                            <button onclick="deletePostItem(${post.id}, '${title.replace(/'/g, "\\'")}')"
+                                class="text-red-500 hover:text-red-700 text-sm font-medium transition-colors ml-auto">
+                                <i class="fas fa-trash-alt mr-1"></i>ลบ
+                            </button>
+                           </div>`
+                        : '';
+
+                    return `
+                    <div class="border rounded-xl p-4 ${st.bg} transition-shadow hover:shadow-md">
+                        <div class="flex justify-between items-start mb-1">
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-sm">${title}</h4>
+                                <div class="text-xs text-gray-500"><i class="fab fa-facebook mr-1"></i>${post.page_name || '-'}</div>
+                            </div>
+                            <span class="text-xs font-bold px-2 py-1 rounded-full ${st.color} bg-white border">
+                                <i class="fas fa-circle text-[6px] mr-1"></i>${st.label}
+                            </span>
                         </div>
+                        <p class="text-sm text-gray-600 mt-2 mb-1">${captionPreview}</p>
+                        <div class="text-xs text-gray-400 flex gap-3 flex-wrap">
+                            ${scheduledText}
+                            <span><i class="far fa-clock mr-1"></i>${new Date(post.created_at).toLocaleDateString('th-TH')}</span>
+                        </div>
+                        ${actionButtons}
                     </div>
-                `).join('');
+                `;
+                }).join('');
 
             } catch (e) {
                 console.error("Load posts error", e);
             }
+        }
+
+        let cachedPostsList = [];
+
+        function editPostInline(postId) {
+            // Fetch the post data and open modal
+            fetch(`${API_BASE}/posts/${postId}`, {
+                headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
+            })
+            .then(res => res.json())
+            .then(post => {
+                document.getElementById('peditPostId').value = post.id;
+                document.getElementById('peditProductName').value = post.product_name || '';
+                document.getElementById('peditCaption').value = post.caption || '';
+                document.getElementById('peditMediaUrl').value = post.media_url || '';
+                document.getElementById('peditMediaType').value = post.media_type || 'image';
+                if (post.scheduled_time) {
+                    const d = new Date(post.scheduled_time);
+                    const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                    document.getElementById('peditScheduledTime').value = local;
+                } else {
+                    document.getElementById('peditScheduledTime').value = '';
+                }
+                document.getElementById('postEditModal').style.display = '';
+            })
+            .catch(e => alert('ไม่สามารถโหลดข้อมูลโพสต์'));
+        }
+
+        function closePostEditModal() {
+            document.getElementById('postEditModal').style.display = 'none';
+        }
+
+        async function savePostEdit() {
+            const postId = document.getElementById('peditPostId').value;
+            const body = {
+                product_name: document.getElementById('peditProductName').value,
+                caption: document.getElementById('peditCaption').value,
+                media_url: document.getElementById('peditMediaUrl').value,
+                media_type: document.getElementById('peditMediaType').value,
+                scheduled_time: document.getElementById('peditScheduledTime').value || null
+            };
+            try {
+                const res = await fetch(`${API_BASE}/posts/${postId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Failed'); }
+                alert('แก้ไขสำเร็จ');
+                closePostEditModal();
+                loadPostsList();
+            } catch (e) { alert('❌ ' + e.message); }
+        }
+
+        async function deletePostItem(postId, title) {
+            if (!confirm(`ลบโพสต์ "${title}"?\nการลบไม่สามารถย้อนกลับได้`)) return;
+            try {
+                const res = await fetch(`${API_BASE}/posts/${postId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
+                });
+                if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Failed'); }
+                alert('ลบโพสต์สำเร็จ');
+                loadPostsList();
+            } catch (e) { alert('❌ ' + e.message); }
         }
 
         // === File Preview ===
