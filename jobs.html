@@ -244,6 +244,10 @@
                 <i class="fas fa-users-cog"></i>
                 <span>Users</span>
             </a>
+            <a href="categories.html" class="nav-item" id="nav-categories" style="display: none;">
+                <i class="fas fa-tags"></i>
+                <span>Categories</span>
+            </a>
         </nav>
 
         <!-- Divider -->
@@ -363,6 +367,18 @@
             </div>
             <input type="hidden" id="editPostId">
             <div class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-sm font-semibold text-gray-600 block mb-1">ชื่อสินค้า / Topic</label>
+                        <input type="text" id="editProductName" class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-gray-600 block mb-1">ประเภท</label>
+                        <select id="editCategory" class="w-full border rounded-xl p-3 text-sm">
+                            <option value="">-- ไม่ระบุ --</option>
+                        </select>
+                    </div>
+                </div>
                 <div>
                     <label class="text-sm font-semibold text-gray-600 block mb-1">Caption</label>
                     <textarea id="editCaption" rows="5" class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none"></textarea>
@@ -432,9 +448,11 @@
             const navJobs = document.getElementById('nav-jobs');
             const navUsers = document.getElementById('nav-users');
             const navAdminHeader = document.getElementById('nav-admin-header');
+            const navCategories = document.getElementById('nav-categories');
             if (navJobs) navJobs.style.display = '';
             if (navUsers) navUsers.style.display = '';
             if (navAdminHeader) navAdminHeader.style.display = '';
+            if (navCategories) navCategories.style.display = '';
         }
 
         async function loadUserInfo() {
@@ -549,6 +567,10 @@
                     ? (job.Caption.length > 80 ? job.Caption.substring(0, 80) + '...' : job.Caption)
                     : '-';
 
+                const categoryBadge = job.Category
+                    ? `<span class="inline-block text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full ml-1">${job.Category}</span>`
+                    : '';
+
                 // Checkbox for admin (only pending/approved/rejected can be selected)
                 const canSelect = currentUserRole === 'admin' && ['pending', 'approved'].includes(job.Status_Posts);
                 const checkboxHtml = canSelect
@@ -568,7 +590,7 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex justify-between items-start mb-1">
                                     <div>
-                                        <h4 class="font-bold text-gray-800">${job.Product || '-'}</h4>
+                                        <h4 class="font-bold text-gray-800">${job.Product || '-'}${categoryBadge}</h4>
                                         <p class="text-sm text-gray-500">เพจ: ${job.Page_Name || '-'}</p>
                                     </div>
                                     <div class="flex items-center gap-2 flex-shrink-0">
@@ -675,9 +697,11 @@
             const job = cachedJobs.find(j => j.PID === pid);
             if (!job) return;
             document.getElementById('editPostId').value = pid;
+            document.getElementById('editProductName').value = job.Product || '';
             document.getElementById('editCaption').value = job.Caption || '';
             document.getElementById('editMediaUrl').value = job.Media_URL || '';
             document.getElementById('editMediaType').value = job.Media || 'image';
+            document.getElementById('editCategory').value = job.Category_ID || '';
             if (job.Scheduled) {
                 const d = new Date(job.Scheduled);
                 const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -694,11 +718,14 @@
 
         async function saveEdit() {
             const pid = document.getElementById('editPostId').value;
+            const catVal = document.getElementById('editCategory').value;
             const body = {
                 caption: document.getElementById('editCaption').value,
                 media_url: document.getElementById('editMediaUrl').value,
                 media_type: document.getElementById('editMediaType').value,
-                scheduled_time: document.getElementById('editScheduledTime').value || null
+                scheduled_time: document.getElementById('editScheduledTime').value || null,
+                product_name: document.getElementById('editProductName').value || null,
+                category_id: catVal ? parseInt(catVal) : null
             };
             try {
                 const res = await fetch(`${API_BASE}/posts/${pid}`, {
@@ -715,6 +742,19 @@
 
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEditModal(); });
 
+        async function loadCategories() {
+            try {
+                const res = await fetch(`${API_BASE}/categories`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
+                });
+                if (!res.ok) return;
+                const cats = await res.json();
+                const select = document.getElementById('editCategory');
+                select.innerHTML = '<option value="">-- ไม่ระบุ --</option>' +
+                    cats.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            } catch (e) { console.error('Failed to load categories:', e); }
+        }
+
         // ========================
         // INIT
         // ========================
@@ -723,6 +763,7 @@
                 window.location.href = 'index.html';
             } else {
                 await loadUserInfo();
+                loadCategories();
                 loadJobsList();
             }
         }
