@@ -299,7 +299,6 @@
                         </button>
                     </div>
 
-                    <!-- Admin Action Bar -->
                     <div id="adminActionBar" class="mb-4 p-3 bg-indigo-50 rounded-xl flex items-center gap-3 flex-wrap"
                         style="display:none">
                         <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700">
@@ -309,14 +308,20 @@
                         </label>
                         <span class="text-sm text-gray-400" id="selectedCount">0 รายการ</span>
                         <div class="flex-1"></div>
-                        <button onclick="bulkApprove()"
-                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
-                            <i class="fas fa-check mr-1"></i>Approve
-                        </button>
-                        <button onclick="bulkReject()"
-                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
-                            <i class="fas fa-times mr-1"></i>Reject
-                        </button>
+                        <div id="bulkActions" style="display:none" class="flex gap-2">
+                            <button onclick="bulkApprove()"
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                                <i class="fas fa-check mr-1"></i>Approve
+                            </button>
+                            <button onclick="bulkReject()"
+                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                                <i class="fas fa-times mr-1"></i>Reject
+                            </button>
+                            <button onclick="bulkDelete()"
+                                class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                                <i class="fas fa-trash mr-1"></i>ลบ
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Page Filter Dropdown -->
@@ -664,6 +669,9 @@
             document.getElementById('selectAllCheckbox').checked =
                 document.querySelectorAll('.job-checkbox').length > 0 &&
                 document.querySelectorAll('.job-checkbox').length === document.querySelectorAll('.job-checkbox:checked').length;
+            // Show/hide bulk action buttons
+            const bulkActions = document.getElementById('bulkActions');
+            if (bulkActions) bulkActions.style.display = selectedPostIds.size > 0 ? '' : 'none';
         }
 
         async function bulkApprove() {
@@ -697,6 +705,24 @@
                 selectedPostIds.clear();
                 loadJobsList();
             } catch (e) { Toast.show('Error: ' + e.message, 'error'); }
+        }
+
+        async function bulkDelete() {
+            if (selectedPostIds.size === 0) { Toast.show('กรุณาเลือกโพสต์ก่อน', 'warning'); return; }
+            if (!confirm(`ลบ ${selectedPostIds.size} โพสต์? การลบไม่สามารถย้อนกลับได้`)) return;
+            let deleted = 0;
+            for (const pid of selectedPostIds) {
+                try {
+                    const res = await fetch(`${API_BASE}/posts/${pid}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
+                    });
+                    if (res.ok) deleted++;
+                } catch (e) { /* skip */ }
+            }
+            Toast.show(`ลบแล้ว ${deleted} โพสต์`, 'success');
+            selectedPostIds.clear();
+            loadJobsList();
         }
 
         // ========================
