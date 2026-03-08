@@ -211,7 +211,7 @@
         </div>
 
         <!-- Navigation Menu -->
-        <nav class="mt-8 px-4 space-y-2 pb-20">
+        <nav class="mt-8 px-4 space-y-2 flex-1 overflow-y-auto">
             <a href="dashboard.html" class="nav-item">
                 <i class="fas fa-home"></i>
                 <span>Dashboard</span>
@@ -251,7 +251,7 @@
         </nav>
 
         <!-- Divider -->
-        <div class="absolute bottom-0 w-full p-4 border-t border-gray-100 bg-gray-50/50 backdrop-blur-sm">
+        <div class="w-full p-4 border-t border-gray-100 bg-gray-50/50 backdrop-blur-sm shrink-0">
             <button onclick="logout()"
                 class="flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium">
                 <i class="fas fa-sign-out-alt w-6"></i>
@@ -303,17 +303,21 @@
                     </div>
 
                     <!-- Admin Action Bar -->
-                    <div id="adminActionBar" class="mb-4 p-3 bg-indigo-50 rounded-xl flex items-center gap-3 flex-wrap" style="display:none">
+                    <div id="adminActionBar" class="mb-4 p-3 bg-indigo-50 rounded-xl flex items-center gap-3 flex-wrap"
+                        style="display:none">
                         <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700">
-                            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)" class="w-4 h-4 rounded">
+                            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)"
+                                class="w-4 h-4 rounded">
                             เลือกทั้งหมด
                         </label>
                         <span class="text-sm text-gray-400" id="selectedCount">0 รายการ</span>
                         <div class="flex-1"></div>
-                        <button onclick="bulkApprove()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                        <button onclick="bulkApprove()"
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
                             <i class="fas fa-check mr-1"></i>Approve
                         </button>
-                        <button onclick="bulkReject()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                        <button onclick="bulkReject()"
+                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
                             <i class="fas fa-times mr-1"></i>Reject
                         </button>
                     </div>
@@ -359,18 +363,22 @@
     </div>
 
     <!-- Edit Modal -->
-    <div id="editModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center" style="display:none">
+    <div id="editModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center"
+        style="display:none">
         <div class="bg-white rounded-2xl shadow-2xl w-[90%] max-w-lg max-h-[85vh] overflow-y-auto p-6">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-bold text-gray-800">แก้ไขโพสต์</h3>
-                <button onclick="closeEditModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+                <button onclick="closeEditModal()"
+                    class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600"><i
+                        class="fas fa-times"></i></button>
             </div>
             <input type="hidden" id="editPostId">
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-sm font-semibold text-gray-600 block mb-1">ชื่อสินค้า / Topic</label>
-                        <input type="text" id="editProductName" class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none">
+                        <input type="text" id="editProductName"
+                            class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none">
                     </div>
                     <div>
                         <label class="text-sm font-semibold text-gray-600 block mb-1">ประเภท</label>
@@ -381,11 +389,13 @@
                 </div>
                 <div>
                     <label class="text-sm font-semibold text-gray-600 block mb-1">Caption</label>
-                    <textarea id="editCaption" rows="5" class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none"></textarea>
+                    <textarea id="editCaption" rows="5"
+                        class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none"></textarea>
                 </div>
                 <div>
                     <label class="text-sm font-semibold text-gray-600 block mb-1">Media URL</label>
-                    <input type="text" id="editMediaUrl" class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none">
+                    <input type="text" id="editMediaUrl"
+                        class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -398,10 +408,12 @@
                     </div>
                     <div>
                         <label class="text-sm font-semibold text-gray-600 block mb-1">นัดโพสต์</label>
-                        <input type="datetime-local" id="editScheduledTime" class="w-full border rounded-xl p-3 text-sm">
+                        <input type="datetime-local" id="editScheduledTime"
+                            class="w-full border rounded-xl p-3 text-sm">
                     </div>
                 </div>
-                <button onclick="saveEdit()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors">
+                <button onclick="saveEdit()"
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors">
                     <i class="fas fa-save mr-2"></i>บันทึก
                 </button>
             </div>
