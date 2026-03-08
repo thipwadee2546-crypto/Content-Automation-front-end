@@ -550,7 +550,7 @@
                     : '-';
 
                 // Checkbox for admin (only pending/approved/rejected can be selected)
-                const canSelect = currentUserRole === 'admin' && ['pending', 'approved', 'rejected'].includes(job.Status_Posts);
+                const canSelect = currentUserRole === 'admin' && ['pending', 'approved'].includes(job.Status_Posts);
                 const checkboxHtml = canSelect
                     ? `<input type="checkbox" class="job-checkbox w-4 h-4 rounded mt-1 flex-shrink-0" data-pid="${job.PID}" onchange="updateSelectedCount()" ${selectedPostIds.has(job.PID) ? 'checked' : ''}>`
                     : '';
