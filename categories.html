@@ -4,26 +4,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Categories - AI Manager</title>
+    <title>Categories - FB AI Content Manager</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        .sidebar { width: 280px; height: 100vh; position: fixed; left: 0; top: 0; background: white; border-right: 1px solid #e5e7eb; overflow-y: auto; z-index: 40; }
-        .main-content { margin-left: 280px; min-height: 100vh; background: #f8fafc; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 10px; color: #64748b; transition: all 0.2s; text-decoration: none; font-size: 0.925rem; }
-        .nav-item:hover { background: #f1f5f9; color: #334155; }
-        .nav-item.active { background: #eef2ff; color: #4f46e5; font-weight: 600; }
-        .fb-card { background: white; border-radius: 16px; border: 1px solid #e5e7eb; }
+        :root {
+            --sidebar-width: 280px;
+            --primary-color: #6366f1;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --bg-color: #f8fafc;
+            --glass-white: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-color);
+            color: #1e293b;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Sidebar Glassmorphism */
+        .sidebar {
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            overflow-y: auto;
+            z-index: 50;
+            transition: transform 0.3s ease;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.mobile-active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Navigation Items */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            margin: 8px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #64748b;
+            font-weight: 500;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item:hover {
+            background: #f1f5f9;
+            color: #334155;
+        }
+
+        .nav-item.active {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .nav-item i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Cards and Containers */
+        .fb-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid #f1f5f9;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
     </style>
 </head>
 
-<body class="bg-gray-50">
+<body>
+
+    <!-- Sidebar -->
     <div class="sidebar">
+        <!-- Logo -->
         <div class="p-6 border-b border-gray-100 flex items-center justify-center">
-            <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white mr-3 shadow-lg shadow-indigo-200">
+            <div
+                class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white mr-3 shadow-lg shadow-indigo-200">
                 <i class="fab fa-facebook-f text-xl"></i>
             </div>
             <div>
@@ -32,6 +136,7 @@
             </div>
         </div>
 
+        <!-- Navigation Menu -->
         <nav class="mt-8 px-4 space-y-2">
             <a href="dashboard.html" class="nav-item">
                 <i class="fas fa-home"></i>
@@ -54,7 +159,9 @@
                 <i class="fas fa-stream"></i>
                 <span>Job Status</span>
             </a>
-            <div class="pt-4 pb-2 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider" id="nav-admin-header" style="display: none;">Admin</div>
+            <div class="pt-4 pb-2 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider" id="nav-admin-header"
+                style="display: none;">
+                Admin</div>
             <a href="pages.html" class="nav-item">
                 <i class="fas fa-flag"></i>
                 <span>Pages</span>
@@ -69,66 +176,85 @@
             </a>
         </nav>
 
+        <!-- Divider -->
         <div class="absolute bottom-0 w-full p-4 border-t border-gray-100 bg-gray-50/50 backdrop-blur-sm">
-            <div class="flex items-center gap-3 cursor-pointer group" onclick="logout()">
-                <div class="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold" id="userInitial">?</div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-600 text-gray-700 truncate" id="userDisplay">Loading...</p>
-                    <p class="text-xs text-gray-400" id="userRole" style="opacity: 0;">User</p>
-                </div>
-                <i class="fas fa-chevron-down text-gray-300 text-xs ml-2"></i>
-            </div>
+            <button onclick="logout()"
+                class="flex items-center w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium">
+                <i class="fas fa-sign-out-alt w-6"></i>
+                <span>Logout</span>
+            </button>
         </div>
     </div>
 
+    <!-- Main Content -->
     <div class="main-content">
+        <!-- Header Bar -->
+        <div
+            class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-8 py-4 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-slate-800">Categories</h2>
+                <p class="text-sm text-slate-500">จัดการประเภทโพสต์</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button
+                    class="w-10 h-10 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-indigo-600 hover:border-indigo-200 flex items-center justify-center transition-all shadow-sm">
+                    <i class="far fa-bell"></i>
+                </button>
+                <div class="user-profile flex items-center gap-3 pl-2 pr-4 py-1.5 bg-white border border-gray-200 rounded-full hover:border-indigo-300 transition-all cursor-pointer shadow-sm"
+                    onclick="window.location.href='profile.html'">
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm"
+                        id="userInitial">A</div>
+                    <div class="hidden md:block">
+                        <p class="text-sm font-bold text-slate-700 leading-tight" id="userDisplay">User</p>
+                        <p class="text-[10px] text-slate-400 uppercase font-bold" id="userRole" style="opacity: 0;"></p>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-300 text-xs ml-2"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page Content -->
         <div class="p-8">
             <div class="fb-card p-6">
                 <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-tags text-indigo-500 mr-2"></i>จัดการประเภทโพสต์</h3>
+                        <h3 class="text-lg font-bold text-gray-800">จัดการประเภทโพสต์</h3>
                         <p class="text-gray-600 text-sm">เพิ่ม แก้ไข และลบประเภทโพสต์ (Admin only)</p>
                     </div>
                 </div>
 
-                <!-- Add Category -->
-                <div class="flex gap-3 mb-6">
-                    <input type="text" id="newCategoryName" placeholder="ชื่อประเภทใหม่..."
-                        class="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 transition-all outline-none">
-                    <button onclick="addCategory()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl font-bold text-sm transition-colors">
-                        <i class="fas fa-plus mr-2"></i>เพิ่ม
-                    </button>
+                <!-- Add Category Form -->
+                <div class="bg-gray-50 p-4 rounded-lg mb-6">
+                    <div class="flex gap-3">
+                        <input type="text" id="newCategoryName" placeholder="ชื่อประเภทใหม่..."
+                            class="flex-1 border rounded px-3 py-2 w-full focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none">
+                        <button onclick="addCategory()"
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-600">
+                            <i class="fas fa-plus mr-2"></i>เพิ่ม
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Category List -->
-                <div id="categoryList" class="space-y-2">
+                <div id="categoryList" class="space-y-3">
                     <p class="text-gray-500 text-center py-4">กำลังโหลด...</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Toast -->
-    <div id="toastContainer" class="fixed top-4 right-4 z-[200] space-y-2"></div>
 
     <script src="config.js"></script>
     <script>
         const API_BASE = CONFIG.API_BASE;
 
-        const Toast = {
-            show(msg, type = 'info', duration = 3000) {
-                const container = document.getElementById('toastContainer');
-                const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600', warning: 'bg-yellow-500' };
-                const el = document.createElement('div');
-                el.className = `${colors[type] || colors.info} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2 transition-opacity duration-300`;
-                el.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-times-circle' : 'fa-info-circle'}"></i>${msg}`;
-                container.appendChild(el);
-                setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, duration);
-            }
-        };
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
 
-        function getToken() { return localStorage.getItem('access_token'); }
-        function isLoggedIn() { return !!getToken(); }
+        function isLoggedIn() {
+            return !!getToken();
+        }
 
         function logout() {
             if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
@@ -154,15 +280,21 @@
                 const response = await fetch(`${API_BASE}/auth/me`, {
                     headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
-                if (!response.ok) throw new Error('Unauthorized');
-                const user = await response.json();
-                document.getElementById('userDisplay').textContent = user.username;
-                document.getElementById('userInitial').textContent = user.username.charAt(0).toUpperCase();
 
+                if (!response.ok) throw new Error('Unauthorized');
+
+                const user = await response.json();
+                const initial = user.username.charAt(0).toUpperCase();
+
+                document.getElementById('userDisplay').textContent = user.username;
+                document.getElementById('userInitial').textContent = initial;
+
+                // Set role display
                 const roleEl = document.getElementById('userRole');
                 if (roleEl) {
                     roleEl.textContent = user.role === 'admin' ? 'Admin' : 'User';
                     roleEl.style.opacity = '1';
+                    roleEl.style.transition = 'opacity 0.3s ease-in';
                 }
 
                 if (user.role === 'admin') {
@@ -171,6 +303,7 @@
                     // Non-admin — redirect
                     window.location.href = 'dashboard.html';
                 }
+
             } catch (error) {
                 console.error('Failed to load user info:', error);
                 logout();
@@ -203,15 +336,25 @@
             }
 
             list.innerHTML = categories.map(cat => `
-                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl group hover:bg-indigo-50 transition-colors" id="cat-${cat.id}">
-                    <i class="fas fa-tag text-indigo-400"></i>
-                    <span class="flex-1 font-medium text-gray-800 cat-name">${cat.name}</span>
-                    <input type="text" class="hidden flex-1 px-3 py-1.5 rounded-lg border text-sm cat-edit-input" value="${cat.name}">
-                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onclick="startEdit(${cat.id})" class="text-indigo-500 hover:text-indigo-700 text-sm cat-edit-btn"><i class="fas fa-edit"></i></button>
-                        <button onclick="saveEdit(${cat.id})" class="hidden text-green-600 hover:text-green-700 text-sm cat-save-btn"><i class="fas fa-check"></i></button>
-                        <button onclick="cancelEdit(${cat.id})" class="hidden text-gray-400 hover:text-gray-600 text-sm cat-cancel-btn"><i class="fas fa-times"></i></button>
-                        <button onclick="deleteCategory(${cat.id}, '${cat.name}')" class="text-red-400 hover:text-red-600 text-sm"><i class="fas fa-trash"></i></button>
+                <div class="bg-white border rounded-lg p-4 flex justify-between items-center" id="cat-${cat.id}">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-tag text-indigo-400"></i>
+                        <span class="font-bold text-gray-800 cat-name">${cat.name}</span>
+                        <input type="text" class="hidden border rounded px-3 py-1 text-sm cat-edit-input" value="${cat.name}">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="startEdit(${cat.id})" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm cat-edit-btn">
+                            <i class="fas fa-edit"></i> แก้ไข
+                        </button>
+                        <button onclick="saveEdit(${cat.id})" class="hidden bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm cat-save-btn">
+                            <i class="fas fa-check"></i> บันทึก
+                        </button>
+                        <button onclick="cancelEdit(${cat.id})" class="hidden bg-gray-400 hover:bg-gray-500 text-white px-3 py-1 rounded text-sm cat-cancel-btn">
+                            <i class="fas fa-times"></i> ยกเลิก
+                        </button>
+                        <button onclick="deleteCategory(${cat.id}, '${cat.name}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                            <i class="fas fa-trash"></i> ลบ
+                        </button>
                     </div>
                 </div>
             `).join('');
@@ -220,17 +363,17 @@
         async function addCategory() {
             const input = document.getElementById('newCategoryName');
             const name = input.value.trim();
-            if (!name) { Toast.show('กรุณาใส่ชื่อประเภท', 'warning'); return; }
+            if (!name) { alert('กรุณาใส่ชื่อประเภท'); return; }
             try {
                 const res = await fetch(`${API_BASE}/categories?name=${encodeURIComponent(name)}`, {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
                 if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Failed'); }
-                Toast.show(`เพิ่มประเภท "${name}" สำเร็จ`, 'success');
+                alert(`เพิ่มประเภท "${name}" สำเร็จ`);
                 input.value = '';
                 loadCategories();
-            } catch (e) { Toast.show('Error: ' + e.message, 'error'); }
+            } catch (e) { alert('❌ ' + e.message); }
         }
 
         function startEdit(id) {
@@ -255,29 +398,29 @@
         async function saveEdit(id) {
             const row = document.getElementById(`cat-${id}`);
             const name = row.querySelector('.cat-edit-input').value.trim();
-            if (!name) { Toast.show('ชื่อห้ามว่าง', 'warning'); return; }
+            if (!name) { alert('ชื่อห้ามว่าง'); return; }
             try {
                 const res = await fetch(`${API_BASE}/categories/${id}?name=${encodeURIComponent(name)}`, {
                     method: 'PUT',
                     headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
                 if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Failed'); }
-                Toast.show('แก้ไขสำเร็จ', 'success');
+                alert('แก้ไขสำเร็จ');
                 loadCategories();
-            } catch (e) { Toast.show('Error: ' + e.message, 'error'); }
+            } catch (e) { alert('❌ ' + e.message); }
         }
 
         async function deleteCategory(id, name) {
-            if (!confirm(`ลบประเภท "${name}"? โพสต์ที่อยู่ในประเภทนี้จะถูกตั้งเป็นไม่ระบุ`)) return;
+            if (!confirm(`ลบประเภท "${name}"?\nโพสต์ที่อยู่ในประเภทนี้จะถูกตั้งเป็นไม่ระบุ`)) return;
             try {
                 const res = await fetch(`${API_BASE}/categories/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
                 if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Failed'); }
-                Toast.show(`ลบประเภท "${name}" แล้ว`, 'success');
+                alert(`ลบประเภท "${name}" แล้ว`);
                 loadCategories();
-            } catch (e) { Toast.show('Error: ' + e.message, 'error'); }
+            } catch (e) { alert('❌ ' + e.message); }
         }
 
         // Enter key to add
@@ -288,11 +431,11 @@
         // ========================
         // INIT
         // ========================
-        async function checkAuth() {
+        function checkAuth() {
             if (!isLoggedIn()) {
                 window.location.href = 'index.html';
             } else {
-                await loadUserInfo();
+                loadUserInfo();
                 loadCategories();
             }
         }
