@@ -289,8 +289,8 @@
                 <div class="fb-card p-6">
                     <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h3 class="text-lg font-bold text-gray-800">📋 สถานะงานการเผยแพร่</h3>
-                            <p class="text-gray-600 text-sm">ดูและจัดการสถานะของงานทั้งหมด</p>
+                            <h3 class="text-lg font-bold text-gray-800">ไปป์ไลน์โพสต์</h3>
+                            <p class="text-gray-600 text-sm" id="jobsSubtitle">ดูสถานะของโพสต์ทั้งหมด</p>
                         </div>
                         <button onclick="refreshJobsList()"
                             class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-600">
@@ -298,9 +298,25 @@
                         </button>
                     </div>
 
+                    <!-- Admin Action Bar -->
+                    <div id="adminActionBar" class="mb-4 p-3 bg-indigo-50 rounded-xl flex items-center gap-3 flex-wrap" style="display:none">
+                        <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-gray-700">
+                            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)" class="w-4 h-4 rounded">
+                            เลือกทั้งหมด
+                        </label>
+                        <span class="text-sm text-gray-400" id="selectedCount">0 รายการ</span>
+                        <div class="flex-1"></div>
+                        <button onclick="bulkApprove()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                            <i class="fas fa-check mr-1"></i>Approve
+                        </button>
+                        <button onclick="bulkReject()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+                            <i class="fas fa-times mr-1"></i>Reject
+                        </button>
+                    </div>
+
                     <!-- Page Filter Dropdown -->
                     <div class="mb-4">
-                        <label class="text-sm font-600 text-gray-700 block mb-2">📄 เลือกเพจที่จะแสดง</label>
+                        <label class="text-sm font-600 text-gray-700 block mb-2">เลือกเพจที่จะแสดง</label>
                         <select id="jobsPageFilter" onchange="setJobsPageFilter(this.value)"
                             class="border rounded px-3 py-2 w-full md:w-64 bg-white">
                             <option value="">-- ดูทั้งหมด --</option>
@@ -313,13 +329,16 @@
                             ทั้งหมด
                         </button>
                         <button onclick="setJobsFilter('pending')" class="status-filter-tab" data-filter="pending">
-                            ⏳ Pending
+                            ⏳ รออนุมัติ
                         </button>
-                        <button onclick="setJobsFilter('ready')" class="status-filter-tab" data-filter="ready">
-                            ✅ Ready
+                        <button onclick="setJobsFilter('approved')" class="status-filter-tab" data-filter="approved">
+                            ✅ อนุมัติแล้ว
                         </button>
                         <button onclick="setJobsFilter('published')" class="status-filter-tab" data-filter="published">
                             📤 Published
+                        </button>
+                        <button onclick="setJobsFilter('rejected')" class="status-filter-tab" data-filter="rejected">
+                            🚫 Rejected
                         </button>
                         <button onclick="setJobsFilter('failed')" class="status-filter-tab" data-filter="failed">
                             ❌ Failed
@@ -335,20 +354,71 @@
         </div>
     </div>
 
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center" style="display:none">
+        <div class="bg-white rounded-2xl shadow-2xl w-[90%] max-w-lg max-h-[85vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-gray-800">แก้ไขโพสต์</h3>
+                <button onclick="closeEditModal()" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+            </div>
+            <input type="hidden" id="editPostId">
+            <div class="space-y-4">
+                <div>
+                    <label class="text-sm font-semibold text-gray-600 block mb-1">Caption</label>
+                    <textarea id="editCaption" rows="5" class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none"></textarea>
+                </div>
+                <div>
+                    <label class="text-sm font-semibold text-gray-600 block mb-1">Media URL</label>
+                    <input type="text" id="editMediaUrl" class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-sm font-semibold text-gray-600 block mb-1">ประเภทสื่อ</label>
+                        <select id="editMediaType" class="w-full border rounded-xl p-3 text-sm">
+                            <option value="image">Image</option>
+                            <option value="video">Video</option>
+                            <option value="text">Text Only</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-sm font-semibold text-gray-600 block mb-1">นัดโพสต์</label>
+                        <input type="datetime-local" id="editScheduledTime" class="w-full border rounded-xl p-3 text-sm">
+                    </div>
+                </div>
+                <button onclick="saveEdit()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors">
+                    <i class="fas fa-save mr-2"></i>บันทึก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-[200] space-y-2"></div>
+
     <script src="config.js"></script>
     <script>
         const API_BASE = CONFIG.API_BASE;
         let cachedJobs = [];
         let currentJobsFilter = 'all';
         let currentJobsPageFilter = '';
+        let currentUserRole = 'user';
+        let selectedPostIds = new Set();
 
-        function getToken() {
-            return localStorage.getItem('access_token');
-        }
+        // Toast utility
+        const Toast = {
+            show(msg, type = 'info', duration = 3000) {
+                const container = document.getElementById('toastContainer');
+                const colors = { success: 'bg-green-600', error: 'bg-red-600', info: 'bg-blue-600', warning: 'bg-yellow-500' };
+                const el = document.createElement('div');
+                el.className = `${colors[type] || colors.info} text-white px-4 py-3 rounded-xl shadow-lg text-sm font-medium flex items-center gap-2 transition-opacity duration-300`;
+                el.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-times-circle' : 'fa-info-circle'}"></i>${msg}`;
+                container.appendChild(el);
+                setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, duration);
+            }
+        };
 
-        function isLoggedIn() {
-            return !!getToken();
-        }
+        function getToken() { return localStorage.getItem('access_token'); }
+        function isLoggedIn() { return !!getToken(); }
 
         function logout() {
             if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
@@ -372,16 +442,11 @@
                 const response = await fetch(`${API_BASE}/auth/me`, {
                     headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
-
                 if (!response.ok) throw new Error('Unauthorized');
-
                 const user = await response.json();
-                const initial = user.username.charAt(0).toUpperCase();
-
                 document.getElementById('userDisplay').textContent = user.username;
-                document.getElementById('userInitial').textContent = initial;
+                document.getElementById('userInitial').textContent = user.username.charAt(0).toUpperCase();
 
-                // Set role display
                 const roleEl = document.getElementById('userRole');
                 if (roleEl) {
                     roleEl.textContent = user.role === 'admin' ? 'Admin' : 'User';
@@ -391,26 +456,28 @@
 
                 if (user.role === 'admin') {
                     showAdminOnlyLinks();
+                    currentUserRole = 'admin';
+                    document.getElementById('adminActionBar').style.display = '';
+                    document.getElementById('jobsSubtitle').textContent = 'อนุมัติ แก้ไข และจัดการโพสต์ทั้งหมด (Admin)';
                 }
-
             } catch (error) {
                 console.error('Failed to load user info:', error);
                 logout();
             }
         }
 
+        // ========================
+        // JOBS LIST
+        // ========================
         async function loadJobsList() {
             try {
                 const response = await fetch(`${API_BASE}/jobs/status-posts`, {
                     headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
                 });
-
                 if (!response.ok) throw new Error('Failed to load jobs');
-
                 cachedJobs = await response.json();
                 updateJobsPageFilterDropdown();
                 renderJobsList();
-
             } catch (error) {
                 console.error('Error loading jobs:', error);
                 document.getElementById('jobsList').innerHTML = '<p class="text-red-500 text-center">ไม่สามารถโหลดสถานะงานได้</p>';
@@ -424,21 +491,36 @@
             if (currentJobsFilter !== 'all') {
                 jobs = jobs.filter(j => j.Status_Posts === currentJobsFilter);
             }
-
             if (currentJobsPageFilter) {
                 jobs = jobs.filter(j => j.Page_Name === currentJobsPageFilter);
             }
 
             if (jobs.length === 0) {
-                jobsList.innerHTML = '<p class="text-gray-500 text-center py-4">ไม่มีงานในระบบ</p>';
+                jobsList.innerHTML = '<p class="text-gray-500 text-center py-4">ไม่มีโพสต์ในหมวดนี้</p>';
                 return;
             }
 
+            const badgeMap = {
+                pending: 'job-badge-pending',
+                approved: 'job-badge-ready',
+                publishing: 'job-badge-processing',
+                published: 'job-badge-published',
+                rejected: 'job-badge-failed',
+                failed: 'job-badge-failed'
+            };
+
+            const statusLabel = {
+                pending: 'รออนุมัติ',
+                approved: 'อนุมัติแล้ว',
+                publishing: 'กำลังโพสต์',
+                published: 'โพสต์แล้ว',
+                rejected: 'ไม่อนุมัติ',
+                failed: 'ล้มเหลว'
+            };
+
             jobsList.innerHTML = jobs.map(job => {
-                const badgeClass = job.Status_Posts === 'pending' ? 'job-badge-pending' :
-                    job.Status_Posts === 'processing' ? 'job-badge-processing' :
-                        job.Status_Posts === 'ready' ? 'job-badge-ready' :
-                            job.Status_Posts === 'failed' ? 'job-badge-failed' : 'job-badge-published';
+                const badgeClass = badgeMap[job.Status_Posts] || 'job-badge-pending';
+                const label = statusLabel[job.Status_Posts] || job.Status_Posts;
 
                 const scheduledText = job.Scheduled
                     ? new Date(job.Scheduled).toLocaleString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
@@ -448,7 +530,6 @@
                     ? new Date(job.Created_At).toLocaleString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
                     : '-';
 
-                // Media thumbnail
                 let thumbHtml = '';
                 if (job.Media_URL) {
                     if (job.Media === 'video') {
@@ -468,9 +549,21 @@
                     ? (job.Caption.length > 80 ? job.Caption.substring(0, 80) + '...' : job.Caption)
                     : '-';
 
+                // Checkbox for admin (only pending/approved/rejected can be selected)
+                const canSelect = currentUserRole === 'admin' && ['pending', 'approved', 'rejected'].includes(job.Status_Posts);
+                const checkboxHtml = canSelect
+                    ? `<input type="checkbox" class="job-checkbox w-4 h-4 rounded mt-1 flex-shrink-0" data-pid="${job.PID}" onchange="updateSelectedCount()" ${selectedPostIds.has(job.PID) ? 'checked' : ''}>`
+                    : '';
+
+                // Edit button for admin (only non-published)
+                const editBtnHtml = currentUserRole === 'admin' && job.Status_Posts !== 'published'
+                    ? `<button onclick="openEditModal(${job.PID})" class="text-indigo-500 hover:text-indigo-700 text-xs font-semibold transition-colors"><i class="fas fa-edit mr-1"></i>แก้ไข</button>`
+                    : '';
+
                 return `
                     <div class="bg-white border rounded-lg p-4">
-                        <div class="flex gap-4">
+                        <div class="flex gap-3">
+                            ${checkboxHtml}
                             ${thumbHtml}
                             <div class="flex-1 min-w-0">
                                 <div class="flex justify-between items-start mb-1">
@@ -478,7 +571,10 @@
                                         <h4 class="font-bold text-gray-800">${job.Product || '-'}</h4>
                                         <p class="text-sm text-gray-500">เพจ: ${job.Page_Name || '-'}</p>
                                     </div>
-                                    <span class="job-badge ${badgeClass} flex-shrink-0">${job.Status_Posts}</span>
+                                    <div class="flex items-center gap-2 flex-shrink-0">
+                                        ${editBtnHtml}
+                                        <span class="job-badge ${badgeClass}">${label}</span>
+                                    </div>
                                 </div>
                                 <p class="text-sm text-gray-700 mb-2 truncate">${captionPreview}</p>
                                 <div class="text-xs text-gray-500 flex gap-4 flex-wrap">
@@ -503,10 +599,12 @@
 
         function setJobsFilter(filter) {
             currentJobsFilter = filter;
+            selectedPostIds.clear();
             document.querySelectorAll('.status-filter-tab').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.filter === filter);
             });
             renderJobsList();
+            updateSelectedCount();
         }
 
         function setJobsPageFilter(pageName) {
@@ -514,15 +612,117 @@
             renderJobsList();
         }
 
-        function refreshJobsList() {
-            loadJobsList();
+        function refreshJobsList() { loadJobsList(); }
+
+        // ========================
+        // SELECTION & APPROVE/REJECT
+        // ========================
+        function toggleSelectAll(checked) {
+            document.querySelectorAll('.job-checkbox').forEach(cb => {
+                cb.checked = checked;
+            });
+            updateSelectedCount();
         }
 
-        function checkAuth() {
+        function updateSelectedCount() {
+            selectedPostIds.clear();
+            document.querySelectorAll('.job-checkbox:checked').forEach(cb => {
+                selectedPostIds.add(parseInt(cb.dataset.pid));
+            });
+            document.getElementById('selectedCount').textContent = `${selectedPostIds.size} รายการ`;
+            document.getElementById('selectAllCheckbox').checked =
+                document.querySelectorAll('.job-checkbox').length > 0 &&
+                document.querySelectorAll('.job-checkbox').length === document.querySelectorAll('.job-checkbox:checked').length;
+        }
+
+        async function bulkApprove() {
+            if (selectedPostIds.size === 0) { Toast.show('กรุณาเลือกโพสต์ก่อน', 'warning'); return; }
+            try {
+                const res = await fetch(`${API_BASE}/posts/approve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' },
+                    body: JSON.stringify([...selectedPostIds])
+                });
+                if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Failed'); }
+                const data = await res.json();
+                Toast.show(`อนุมัติแล้ว ${data.approved_count} โพสต์`, 'success');
+                selectedPostIds.clear();
+                loadJobsList();
+            } catch (e) { Toast.show('Error: ' + e.message, 'error'); }
+        }
+
+        async function bulkReject() {
+            if (selectedPostIds.size === 0) { Toast.show('กรุณาเลือกโพสต์ก่อน', 'warning'); return; }
+            if (!confirm(`ไม่อนุมัติ ${selectedPostIds.size} โพสต์?`)) return;
+            try {
+                const res = await fetch(`${API_BASE}/posts/reject`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' },
+                    body: JSON.stringify([...selectedPostIds])
+                });
+                if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Failed'); }
+                const data = await res.json();
+                Toast.show(`ไม่อนุมัติ ${data.rejected_count} โพสต์`, 'success');
+                selectedPostIds.clear();
+                loadJobsList();
+            } catch (e) { Toast.show('Error: ' + e.message, 'error'); }
+        }
+
+        // ========================
+        // EDIT MODAL
+        // ========================
+        function openEditModal(pid) {
+            const job = cachedJobs.find(j => j.PID === pid);
+            if (!job) return;
+            document.getElementById('editPostId').value = pid;
+            document.getElementById('editCaption').value = job.Caption || '';
+            document.getElementById('editMediaUrl').value = job.Media_URL || '';
+            document.getElementById('editMediaType').value = job.Media || 'image';
+            if (job.Scheduled) {
+                const d = new Date(job.Scheduled);
+                const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+                document.getElementById('editScheduledTime').value = local;
+            } else {
+                document.getElementById('editScheduledTime').value = '';
+            }
+            document.getElementById('editModal').style.display = '';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function saveEdit() {
+            const pid = document.getElementById('editPostId').value;
+            const body = {
+                caption: document.getElementById('editCaption').value,
+                media_url: document.getElementById('editMediaUrl').value,
+                media_type: document.getElementById('editMediaType').value,
+                scheduled_time: document.getElementById('editScheduledTime').value || null
+            };
+            try {
+                const res = await fetch(`${API_BASE}/posts/${pid}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) { const err = await res.json(); throw new Error(err.detail || 'Failed'); }
+                Toast.show('แก้ไขโพสต์สำเร็จ!', 'success');
+                closeEditModal();
+                loadJobsList();
+            } catch (e) { Toast.show('Error: ' + e.message, 'error'); }
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEditModal(); });
+
+        // ========================
+        // INIT
+        // ========================
+        async function checkAuth() {
             if (!isLoggedIn()) {
                 window.location.href = 'index.html';
             } else {
-                loadUserInfo();
+                await loadUserInfo();
                 loadJobsList();
             }
         }
