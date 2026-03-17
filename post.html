@@ -361,7 +361,15 @@
                 </button>
             </div>
             <input type="hidden" id="peditPostId">
+            <input type="hidden" id="peditOldMediaUrl">
             <div class="space-y-4">
+                <!-- Page Selector -->
+                <div>
+                    <label class="text-sm font-semibold text-gray-600 block mb-1">เพจ Facebook</label>
+                    <select id="peditPage" class="w-full border rounded-xl p-3 text-sm">
+                        <option value="">-- เลือกเพจ --</option>
+                    </select>
+                </div>
                 <div>
                     <label class="text-sm font-semibold text-gray-600 block mb-1">ชื่อสินค้า / Topic</label>
                     <input type="text" id="peditProductName"
@@ -372,10 +380,45 @@
                     <textarea id="peditCaption" rows="5"
                         class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none"></textarea>
                 </div>
+                <!-- File Upload Zone -->
                 <div>
-                    <label class="text-sm font-semibold text-gray-600 block mb-1">Media URL</label>
-                    <input type="text" id="peditMediaUrl"
-                        class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none">
+                    <label class="text-sm font-semibold text-gray-600 block mb-1">ไฟล์สื่อ</label>
+                    <!-- Current file preview -->
+                    <div id="peditCurrentMedia" class="hidden mb-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-sm text-gray-600 min-w-0">
+                                <i class="fas fa-file-image text-indigo-400"></i>
+                                <span id="peditCurrentMediaName" class="truncate">ไฟล์ปัจจุบัน</span>
+                            </div>
+                            <button type="button" onclick="removeEditMedia()"
+                                class="text-red-400 hover:text-red-600 text-xs font-medium shrink-0 ml-2">
+                                <i class="fas fa-trash mr-1"></i>ลบ
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Upload zone -->
+                    <div id="peditDropZone"
+                        class="w-full px-4 py-4 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-indigo-300 transition-all cursor-pointer text-center"
+                        onclick="document.getElementById('peditMediaFile').click()">
+                        <i class="fas fa-cloud-upload-alt text-xl text-gray-400 mb-1"></i>
+                        <p class="text-sm text-gray-500">คลิกเพื่อเลือกไฟล์ใหม่</p>
+                        <p class="text-xs text-gray-400">JPG, PNG, GIF, MP4, MOV (ไม่เกิน 10MB)</p>
+                    </div>
+                    <input type="file" id="peditMediaFile" class="hidden" accept="image/*,video/*"
+                        onchange="previewEditFile(this)">
+                    <!-- New file preview -->
+                    <div id="peditNewFilePreview" class="hidden mt-2 p-3 bg-green-50 rounded-xl border border-green-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-sm text-green-700 min-w-0">
+                                <i class="fas fa-check-circle"></i>
+                                <span id="peditNewFileName" class="truncate">ไฟล์ใหม่</span>
+                            </div>
+                            <button type="button" onclick="clearEditFile()"
+                                class="text-red-400 hover:text-red-600 text-xs font-medium shrink-0 ml-2">
+                                <i class="fas fa-times mr-1"></i>ยกเลิก
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -393,7 +436,7 @@
                             class="w-full border rounded-xl p-3 text-sm">
                     </div>
                 </div>
-                <button onclick="savePostEdit()"
+                <button onclick="savePostEdit()" id="peditSaveBtn"
                     class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors">
                     <i class="fas fa-save mr-2"></i>บันทึก
                 </button>
@@ -596,19 +639,48 @@
         }
 
         let cachedPostsList = [];
+        let peditRemoveMedia = false;
 
-        function editPostInline(postId) {
-            // Fetch the post data and open modal
-            fetch(`${API_BASE}/posts/${postId}`, {
-                headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
-            })
-            .then(res => res.json())
-            .then(post => {
+        async function editPostInline(postId) {
+            // Reset state
+            peditRemoveMedia = false;
+            document.getElementById('peditMediaFile').value = '';
+            document.getElementById('peditNewFilePreview').classList.add('hidden');
+            
+            // Load pages into dropdown
+            const pageSelect = document.getElementById('peditPage');
+            pageSelect.innerHTML = '<option value="">-- เลือกเพจ --</option>';
+            for (const p of availablePages) {
+                pageSelect.innerHTML += `<option value="${p.id}" data-name="${p.name}" data-key="${p.page_access_token}">${p.name}</option>`;
+            }
+
+            // Fetch post data
+            try {
+                const res = await fetch(`${API_BASE}/posts/${postId}`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
+                });
+                const post = await res.json();
+                
                 document.getElementById('peditPostId').value = post.id;
+                document.getElementById('peditOldMediaUrl').value = post.media_url || '';
                 document.getElementById('peditProductName').value = post.product_name || '';
                 document.getElementById('peditCaption').value = post.caption || '';
-                document.getElementById('peditMediaUrl').value = post.media_url || '';
                 document.getElementById('peditMediaType').value = post.media_type || 'image';
+                
+                // Set page dropdown
+                const matchPage = availablePages.find(p => p.name === post.page_name);
+                if (matchPage) pageSelect.value = matchPage.id;
+                
+                // Show current media
+                const currentMediaDiv = document.getElementById('peditCurrentMedia');
+                if (post.media_url) {
+                    document.getElementById('peditCurrentMediaName').textContent = post.media_type === 'video' ? '🎬 วิดีโอปัจจุบัน' : '🖼️ รูปภาพปัจจุบัน';
+                    currentMediaDiv.classList.remove('hidden');
+                } else {
+                    currentMediaDiv.classList.add('hidden');
+                }
+
+                // Scheduled time
                 if (post.scheduled_time) {
                     const d = new Date(post.scheduled_time);
                     const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -616,25 +688,83 @@
                 } else {
                     document.getElementById('peditScheduledTime').value = '';
                 }
+                
                 document.getElementById('postEditModal').style.display = '';
-            })
-            .catch(e => alert('ไม่สามารถโหลดข้อมูลโพสต์'));
+            } catch (e) {
+                alert('ไม่สามารถโหลดข้อมูลโพสต์');
+            }
         }
 
         function closePostEditModal() {
             document.getElementById('postEditModal').style.display = 'none';
         }
 
+        function previewEditFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            document.getElementById('peditNewFileName').textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
+            document.getElementById('peditNewFilePreview').classList.remove('hidden');
+            // Auto-set media type
+            if (file.type.startsWith('image/')) document.getElementById('peditMediaType').value = 'image';
+            else if (file.type.startsWith('video/')) document.getElementById('peditMediaType').value = 'video';
+        }
+
+        function clearEditFile() {
+            document.getElementById('peditMediaFile').value = '';
+            document.getElementById('peditNewFilePreview').classList.add('hidden');
+        }
+
+        function removeEditMedia() {
+            peditRemoveMedia = true;
+            document.getElementById('peditCurrentMedia').classList.add('hidden');
+        }
+
         async function savePostEdit() {
             const postId = document.getElementById('peditPostId').value;
-            const body = {
-                product_name: document.getElementById('peditProductName').value,
-                caption: document.getElementById('peditCaption').value,
-                media_url: document.getElementById('peditMediaUrl').value,
-                media_type: document.getElementById('peditMediaType').value,
-                scheduled_time: document.getElementById('peditScheduledTime').value || null
-            };
+            const btn = document.getElementById('peditSaveBtn');
+            const origText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
+            btn.disabled = true;
+
             try {
+                let mediaUrl = undefined; // undefined = don't change
+                const newFile = document.getElementById('peditMediaFile').files[0];
+
+                // Step 1: Upload new file if selected
+                if (newFile) {
+                    const formData = new FormData();
+                    formData.append('file', newFile);
+                    const uploadRes = await fetch(`${API_BASE}/upload`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' },
+                        body: formData
+                    });
+                    if (!uploadRes.ok) { const err = await uploadRes.json(); throw new Error(err.detail || 'Upload failed'); }
+                    const uploadResult = await uploadRes.json();
+                    mediaUrl = uploadResult.media_url;
+                } else if (peditRemoveMedia) {
+                    mediaUrl = ''; // Clear media
+                }
+
+                // Step 2: Build update body
+                const body = {
+                    product_name: document.getElementById('peditProductName').value,
+                    caption: document.getElementById('peditCaption').value,
+                    media_type: document.getElementById('peditMediaType').value,
+                    scheduled_time: document.getElementById('peditScheduledTime').value || null
+                };
+                if (mediaUrl !== undefined) body.media_url = mediaUrl;
+
+                // Page fields
+                const pageSelect = document.getElementById('peditPage');
+                if (pageSelect.value) {
+                    const opt = pageSelect.selectedOptions[0];
+                    body.page_id = pageSelect.value;
+                    body.page_name = opt.dataset.name;
+                    body.page_key = opt.dataset.key;
+                }
+
+                // Step 3: Save
                 const res = await fetch(`${API_BASE}/posts/${postId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' },
@@ -644,7 +774,12 @@
                 alert('แก้ไขสำเร็จ');
                 closePostEditModal();
                 loadPostsList();
-            } catch (e) { alert('❌ ' + e.message); }
+            } catch (e) { 
+                alert('❌ ' + e.message);
+            } finally {
+                btn.innerHTML = origText;
+                btn.disabled = false;
+            }
         }
 
         async function deletePostItem(postId, title) {
@@ -659,6 +794,7 @@
                 loadPostsList();
             } catch (e) { alert('❌ ' + e.message); }
         }
+
 
         // === File Preview ===
         function previewFile(input) {

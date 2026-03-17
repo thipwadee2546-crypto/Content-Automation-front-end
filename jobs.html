@@ -375,7 +375,15 @@
                         class="fas fa-times"></i></button>
             </div>
             <input type="hidden" id="editPostId">
+            <input type="hidden" id="editOldMediaUrl">
             <div class="space-y-4">
+                <!-- Page Selector -->
+                <div>
+                    <label class="text-sm font-semibold text-gray-600 block mb-1">เพจ Facebook</label>
+                    <select id="editPage" class="w-full border rounded-xl p-3 text-sm">
+                        <option value="">-- เลือกเพจ --</option>
+                    </select>
+                </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-sm font-semibold text-gray-600 block mb-1">ชื่อสินค้า / Topic</label>
@@ -394,18 +402,50 @@
                     <textarea id="editCaption" rows="5"
                         class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none"></textarea>
                 </div>
+                <!-- File Upload Zone -->
                 <div>
-                    <label class="text-sm font-semibold text-gray-600 block mb-1">Media URL</label>
-                    <input type="text" id="editMediaUrl"
-                        class="w-full border rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 outline-none">
+                    <label class="text-sm font-semibold text-gray-600 block mb-1">ไฟล์สื่อ</label>
+                    <div id="editCurrentMedia" class="hidden mb-2 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-sm text-gray-600 min-w-0">
+                                <i class="fas fa-file-image text-indigo-400"></i>
+                                <span id="editCurrentMediaName" class="truncate">ไฟล์ปัจจุบัน</span>
+                            </div>
+                            <button type="button" onclick="removeJobEditMedia()"
+                                class="text-red-400 hover:text-red-600 text-xs font-medium shrink-0 ml-2">
+                                <i class="fas fa-trash mr-1"></i>ลบ
+                            </button>
+                        </div>
+                    </div>
+                    <div id="editDropZone"
+                        class="w-full px-4 py-4 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-indigo-300 transition-all cursor-pointer text-center"
+                        onclick="document.getElementById('editMediaFile').click()">
+                        <i class="fas fa-cloud-upload-alt text-xl text-gray-400 mb-1"></i>
+                        <p class="text-sm text-gray-500">คลิกเพื่อเลือกไฟล์ใหม่</p>
+                        <p class="text-xs text-gray-400">JPG, PNG, GIF, MP4, MOV (ไม่เกิน 10MB)</p>
+                    </div>
+                    <input type="file" id="editMediaFile" class="hidden" accept="image/*,video/*"
+                        onchange="previewJobEditFile(this)">
+                    <div id="editNewFilePreview" class="hidden mt-2 p-3 bg-green-50 rounded-xl border border-green-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-sm text-green-700 min-w-0">
+                                <i class="fas fa-check-circle"></i>
+                                <span id="editNewFileName" class="truncate">ไฟล์ใหม่</span>
+                            </div>
+                            <button type="button" onclick="clearJobEditFile()"
+                                class="text-red-400 hover:text-red-600 text-xs font-medium shrink-0 ml-2">
+                                <i class="fas fa-times mr-1"></i>ยกเลิก
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-sm font-semibold text-gray-600 block mb-1">ประเภทสื่อ</label>
                         <select id="editMediaType" class="w-full border rounded-xl p-3 text-sm">
-                            <option value="image">Image</option>
-                            <option value="video">Video</option>
-                            <option value="text">Text Only</option>
+                            <option value="image">รูปภาพ</option>
+                            <option value="video">วิดีโอ</option>
+                            <option value="text">ข้อความ</option>
                         </select>
                     </div>
                     <div>
@@ -414,7 +454,7 @@
                             class="w-full border rounded-xl p-3 text-sm">
                     </div>
                 </div>
-                <button onclick="saveEdit()"
+                <button onclick="saveEdit()" id="editSaveBtn"
                     class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors">
                     <i class="fas fa-save mr-2"></i>บันทึก
                 </button>
@@ -728,15 +768,49 @@
         // ========================
         // EDIT MODAL
         // ========================
-        function openEditModal(pid) {
+        let editRemoveMedia = false;
+
+        async function openEditModal(pid) {
             const job = cachedJobs.find(j => j.PID === pid);
             if (!job) return;
+
+            // Reset state
+            editRemoveMedia = false;
+            document.getElementById('editMediaFile').value = '';
+            document.getElementById('editNewFilePreview').classList.add('hidden');
+
+            // Load pages into dropdown
+            const pageSelect = document.getElementById('editPage');
+            pageSelect.innerHTML = '<option value="">-- เลือกเพจ --</option>';
+            try {
+                const pagesRes = await fetch(`${API_BASE}/pages`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' }
+                });
+                if (pagesRes.ok) {
+                    const pages = await pagesRes.json();
+                    for (const p of pages) {
+                        const selected = p.name === job.Page_Name ? 'selected' : '';
+                        pageSelect.innerHTML += `<option value="${p.id}" data-name="${p.name}" data-key="${p.page_access_token}" ${selected}>${p.name}</option>`;
+                    }
+                }
+            } catch (e) { /* ignore */ }
+
             document.getElementById('editPostId').value = pid;
+            document.getElementById('editOldMediaUrl').value = job.Media_URL || '';
             document.getElementById('editProductName').value = job.Product || '';
             document.getElementById('editCaption').value = job.Caption || '';
-            document.getElementById('editMediaUrl').value = job.Media_URL || '';
             document.getElementById('editMediaType').value = job.Media || 'image';
             document.getElementById('editCategory').value = job.Category_ID || '';
+
+            // Show current media
+            const currentMediaDiv = document.getElementById('editCurrentMedia');
+            if (job.Media_URL) {
+                document.getElementById('editCurrentMediaName').textContent = job.Media === 'video' ? '🎬 วิดีโอปัจจุบัน' : '🖼️ รูปภาพปัจจุบัน';
+                currentMediaDiv.classList.remove('hidden');
+            } else {
+                currentMediaDiv.classList.add('hidden');
+            }
+
             if (job.Scheduled) {
                 const d = new Date(job.Scheduled);
                 const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -751,18 +825,73 @@
             document.getElementById('editModal').style.display = 'none';
         }
 
+        function previewJobEditFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            document.getElementById('editNewFileName').textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
+            document.getElementById('editNewFilePreview').classList.remove('hidden');
+            if (file.type.startsWith('image/')) document.getElementById('editMediaType').value = 'image';
+            else if (file.type.startsWith('video/')) document.getElementById('editMediaType').value = 'video';
+        }
+
+        function clearJobEditFile() {
+            document.getElementById('editMediaFile').value = '';
+            document.getElementById('editNewFilePreview').classList.add('hidden');
+        }
+
+        function removeJobEditMedia() {
+            editRemoveMedia = true;
+            document.getElementById('editCurrentMedia').classList.add('hidden');
+        }
+
         async function saveEdit() {
             const pid = document.getElementById('editPostId').value;
-            const catVal = document.getElementById('editCategory').value;
-            const body = {
-                caption: document.getElementById('editCaption').value,
-                media_url: document.getElementById('editMediaUrl').value,
-                media_type: document.getElementById('editMediaType').value,
-                scheduled_time: document.getElementById('editScheduledTime').value || null,
-                product_name: document.getElementById('editProductName').value || null,
-                category_id: catVal ? parseInt(catVal) : null
-            };
+            const btn = document.getElementById('editSaveBtn');
+            const origText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
+            btn.disabled = true;
+
             try {
+                let mediaUrl = undefined;
+                const newFile = document.getElementById('editMediaFile').files[0];
+
+                // Step 1: Upload new file if selected
+                if (newFile) {
+                    const formData = new FormData();
+                    formData.append('file', newFile);
+                    const uploadRes = await fetch(`${API_BASE}/upload`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' },
+                        body: formData
+                    });
+                    if (!uploadRes.ok) { const err = await uploadRes.json(); throw new Error(err.detail || 'Upload failed'); }
+                    const uploadResult = await uploadRes.json();
+                    mediaUrl = uploadResult.media_url;
+                } else if (editRemoveMedia) {
+                    mediaUrl = '';
+                }
+
+                // Step 2: Build body
+                const catVal = document.getElementById('editCategory').value;
+                const body = {
+                    caption: document.getElementById('editCaption').value,
+                    media_type: document.getElementById('editMediaType').value,
+                    scheduled_time: document.getElementById('editScheduledTime').value || null,
+                    product_name: document.getElementById('editProductName').value || null,
+                    category_id: catVal ? parseInt(catVal) : null
+                };
+                if (mediaUrl !== undefined) body.media_url = mediaUrl;
+
+                // Page fields
+                const pageSelect = document.getElementById('editPage');
+                if (pageSelect.value) {
+                    const opt = pageSelect.selectedOptions[0];
+                    body.page_id = pageSelect.value;
+                    body.page_name = opt.dataset.name;
+                    body.page_key = opt.dataset.key;
+                }
+
+                // Step 3: Save
                 const res = await fetch(`${API_BASE}/posts/${pid}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}`, 'ngrok-skip-browser-warning': 'true' },
@@ -772,7 +901,12 @@
                 Toast.show('แก้ไขโพสต์สำเร็จ!', 'success');
                 closeEditModal();
                 loadJobsList();
-            } catch (e) { Toast.show('Error: ' + e.message, 'error'); }
+            } catch (e) { 
+                Toast.show('Error: ' + e.message, 'error');
+            } finally {
+                btn.innerHTML = origText;
+                btn.disabled = false;
+            }
         }
 
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEditModal(); });
